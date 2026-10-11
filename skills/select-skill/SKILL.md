@@ -24,6 +24,8 @@ Read the task in one sentence. Return one path from the table. Do not return two
 | Research, eval, or cut a prompt | `skills/use-harness/references/optimise.md` |
 | Fill a niche note | `plan/niches/INDEX.md` |
 | Onboard this machine before a project | `skills/onboard/SKILL.md` |
+| Add or choose a skill from Vercel, Cloudflare, or GitHub | `skills/develop-skill/SKILL.md` |
+| Discover an MCP server | `skills/develop-skill/SKILL.md` |
 | Choose an OmniRoute provision | `plan/omniroute.md` |
 | Market, price, or competitor fact | `plan/niches/INDEX.md` market rows, then radar |
 | BGP, firewall, eBPF, XDP, or DDoS defense on our hosts | `sections/security` |
