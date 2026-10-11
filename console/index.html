@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>den controller</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #14120f;
+    --panel: #1c1915;
+    --ink: #f3efe6;
+    --muted: #a39888;
+    --line: #3a342c;
+    --accent: #f76707;
+    --up: #9dbe7c;
+    --down: #e07a5f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.45 "Iowan Old Style", Palatino, Georgia, serif;
+  }
+  header, main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; }
+  header { padding: 28px 0 12px; display: flex; justify-content: space-between; gap: 16px; align-items: baseline; }
+  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; margin: 0; }
+  h1 span { color: var(--accent); }
+  p { color: var(--muted); margin: 6px 0 0; }
+  button {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 18px 0; }
+  .card, table { background: var(--panel); border: 1px solid var(--line); }
+  .card { padding: 14px 16px; border-radius: 12px; }
+  .card b { display: block; font-size: 26px; letter-spacing: -0.04em; }
+  .card span, th { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; border-radius: 12px; overflow: hidden; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.sha { font-family: ui-monospace, monospace; font-size: 12px; }
+  .up { color: var(--up); }
+  .down { color: var(--down); }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 22px; }
+  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+    table { display: block; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>den <span>controller</span></h1>
+    <p>Loopback only. Branches, services, and guests. It does not start or stop a seat.</p>
+  </div>
+  <button type="button" id="reload">Reload</button>
+</header>
+<main>
+  <section class="grid" id="counts"></section>
+  <section class="pills" id="services"></section>
+  <section class="pills" id="guests"></section>
+  <table>
+    <thead><tr><th>Branch</th><th>Ahead</th><th>When</th><th>Subject</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+<script>
+const counts = document.querySelector("#counts");
+const services = document.querySelector("#services");
+const guests = document.querySelector("#guests");
+const rows = document.querySelector("#rows");
+
+function pill(name, state) {
+  const el = document.createElement("span");
+  el.className = "pill " + (state === "up" ? "up" : "down");
+  el.textContent = name + " " + state;
+  return el;
+}
+
+async function load() {
+  const res = await fetch("/api/state");
+  const data = await res.json();
+  counts.replaceChildren();
+  for (const [key, value] of Object.entries(data.counts)) {
+    const card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML = "<span></span><b></b>";
+    card.querySelector("span").textContent = key;
+    card.querySelector("b").textContent = value;
+    counts.append(card);
+  }
+  services.replaceChildren(...Object.entries(data.services).map(([name, state]) => pill(name, state)));
+  guests.replaceChildren();
+  if (data.guests.length === 0) guests.append(pill("guests", "none"));
+  else data.guests.forEach((line) => guests.append(pill("guest", line)));
+  if (data.schedules.length === 0) guests.append(pill("schedules", "none"));
+  rows.replaceChildren();
+  for (const row of data.branches) {
+    if (row.kind === "draft" && row.ahead === 0) continue;
+    const tr = document.createElement("tr");
+    tr.innerHTML = "<td></td><td class='sha'></td><td></td><td></td>";
+    const cells = tr.children;
+    cells[0].textContent = row.name;
+    cells[1].textContent = row.sha + " +" + row.ahead;
+    cells[2].textContent = row.when;
+    cells[3].textContent = row.subject;
+    rows.append(tr);
+  }
+}
+document.querySelector("#reload").addEventListener("click", load);
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>
