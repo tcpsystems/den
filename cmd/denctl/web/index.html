@@ -40,6 +40,8 @@
   <section class="pills" id="services"></section>
   <h2>Slots <span>for later</span></h2>
   <section class="slots" id="slots"></section>
+  <h2>Nest</h2>
+  <table><thead><tr><th>Org</th><th>Project</th><th>Role</th><th>Status</th></tr></thead><tbody id="projects"></tbody></table>
   <h2>Branches</h2>
   <table><thead><tr><th>Branch</th><th>Ahead</th><th>Subject</th></tr></thead><tbody id="rows"></tbody></table>
 </main>
@@ -64,6 +66,13 @@ function paint(data) {
     const card = el("article", "slot" + (slot.status === "this" ? " this" : ""));
     card.append(el("strong", "", slot.id), el("small", "", slot.status), el("div", "", slot.note));
     slots.append(card);
+  }
+  const projects = document.querySelector("#projects");
+  projects.replaceChildren();
+  for (const project of data.projects || []) {
+    const tr = document.createElement("tr");
+    tr.append(el("td", "", project.org), el("td", "", project.name), el("td", "", project.role), el("td", project.status === "present" ? "up" : "down", project.status));
+    projects.append(tr);
   }
   const rows = document.querySelector("#rows");
   rows.replaceChildren();

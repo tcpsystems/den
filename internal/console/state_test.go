@@ -1,6 +1,10 @@
 package console
 
-import "testing"
+import (
+	"os"
+	"strings"
+	"testing"
+)
 
 func TestSlotsAreOneList(t *testing.T) {
 	slots := Slots()
@@ -24,6 +28,29 @@ func TestSlotsAreOneList(t *testing.T) {
 		if !seen[id] {
 			t.Fatalf("missing later slot %s", id)
 		}
+	}
+}
+
+func TestProjectsStayOutOfSecrets(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(dir+"/Projects/harness-plan", 0o755); err != nil {
+		t.Fatal(err)
+	}
+	rows := Projects(dir)
+	if len(rows) < 5 {
+		t.Fatalf("projects %d", len(rows))
+	}
+	var den Project
+	for _, row := range rows {
+		if strings.Contains(strings.ToLower(row.Role), "token") || strings.Contains(strings.ToLower(row.Name), "secret") {
+			t.Fatalf("secret in project row %+v", row)
+		}
+		if row.Name == "den" {
+			den = row
+		}
+	}
+	if den.Status != "present" || den.Org != "tcpsystems" {
+		t.Fatalf("den %+v", den)
 	}
 }
 

@@ -2,7 +2,9 @@ package console
 
 import (
 	"context"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -21,6 +23,16 @@ type State struct {
 	Counts   map[string]int    `json:"counts"`
 	Branches []Branch          `json:"branches"`
 	Slots    []Slot            `json:"slots"`
+	Projects []Project         `json:"projects"`
+}
+
+// Project is one repo sitting in the nest. The harness does not own its GitHub history.
+type Project struct {
+	Org    string `json:"org"`
+	Name   string `json:"name"`
+	Path   string `json:"path"`
+	Role   string `json:"role"`
+	Status string `json:"status"`
 }
 
 // Branch is one git ref the controller is allowed to show.
@@ -112,7 +124,34 @@ func Collect(ctx context.Context, repo string) State {
 		},
 		Branches: rows,
 		Slots:    Slots(),
+		Projects: Projects(""),
 	}
+}
+
+// Projects lists the nest. home defaults to the current user. Status is present or missing. Paths are not secret files.
+func Projects(home string) []Project {
+	if home == "" {
+		home, _ = os.UserHomeDir()
+	}
+	rows := []Project{
+		{"tcpsystems", "den", "Projects/harness-plan", "harness", ""},
+		{"tcpsystems", "radar", "Projects/tcp-systems", "trackers, sources, prices, models", ""},
+		{"foxcore-cloud", "fox", "Projects/org/foxcore-cloud/fox", "company panel", ""},
+		{"foxcore-cloud", "foxd", "Projects/org/foxcore-cloud/foxd", "node agent", ""},
+		{"foxcore-cloud", "floki", "Projects/org/foxcore-cloud/floki", "hypervisor agent", ""},
+		{"foxcore-cloud", "ideology", "Projects/org/foxcore-cloud/ideology", "doctrine", ""},
+		{"foxcore-cloud", "agent-mesh", "Projects/agent-mesh", "archived harness", ""},
+	}
+	for i := range rows {
+		full := filepath.Join(home, rows[i].Path)
+		rows[i].Path = full
+		if st, err := os.Stat(full); err == nil && st.IsDir() {
+			rows[i].Status = "present"
+		} else {
+			rows[i].Status = "missing"
+		}
+	}
+	return rows
 }
 
 func readBranches(ctx context.Context, repo string) []Branch {

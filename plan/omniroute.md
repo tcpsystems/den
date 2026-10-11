@@ -13,6 +13,7 @@ OmniRoute is a tool the packet names. It is not the seat's model hop. A provisio
 | Compression or prompt rewrite | The leader already cut the prompt and the packet still asks for a smaller body | As the default on every call | `skills/use-harness/references/optimise.md` |
 | Embeddings | Never. Vectors are `127.0.0.1:8091` | Always | `skills/use-harness/references/embed.md` |
 | Memory read | Never. Fast and recent are local. OpenViking is local | Always | `skills/use-harness/references/memory.md` |
+| Persistence copy | After a local note is written, the backup script copies fast and recent to the OmniRoute host | As the seat's read path, or before the note exists | `scripts/backup-fast-memory.sh` |
 | Model score | After local probes in `scripts/score-harness-winner.py` | To pick the seat's model inside the loop | `plan/omniroute.md` |
 
 ## Calculated use
