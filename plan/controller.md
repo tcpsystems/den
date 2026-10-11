@@ -4,6 +4,8 @@ This is the plan for the den controller. It is not the implementation. The Pytho
 
 ## Want
 
+The start before this page exists is `plan/start.md`. Onboarding reports which local services are present. It does not reveal secrets. The page, when built, shows the same present or missing state.
+
 The person running the harness can see every section branch, every service, every guest, and every schedule, on one page, and can tell a seat to start or stop only by a button that asks first. The page is local. It is not the Foxcore panel and it is not a public site.
 
 ## Landscape
