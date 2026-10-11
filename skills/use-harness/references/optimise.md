@@ -6,7 +6,7 @@ Pick one of these and write the result as a suggestion. Do not rewrite a decided
 
 | Job | Do |
 | --- | --- |
-| Prompt | Cut the packet to the section, one skill body, and the tool list the section named |
+| Prompt | Cut the packet to the section, one skill body, and the tool list the section named. An OmniRoute rewrite runs only if the packet still asks for a smaller body |
 | Deep research | Open the cited page. One claim, one URL |
 | Deep analysis | Name the function and the invariant it enforces |
 | Onboarding | List the route table in `SKILL.md` and the one command that proves the machine is up |
