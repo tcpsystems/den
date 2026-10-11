@@ -7,7 +7,7 @@ ROOT=/home/kivox/Projects/harness-plan
 LOG=/tmp/harness-plan-land.log
 cd "$ROOT"
 end=$((SECONDS + 21600))
-base=18ab6fb
+base=$(git rev-parse 18ab6fb)
 branches=$(git for-each-ref --format='%(refname:short)' refs/heads | grep -E '^r(10|[1-9])(g[1-5])?$' || true)
 while [ "$SECONDS" -lt "$end" ]; do
   pending=0
