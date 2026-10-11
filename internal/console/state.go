@@ -48,6 +48,7 @@ type Branch struct {
 func Slots() []Slot {
 	return []Slot{
 		{ID: "go", Status: "this", Note: "API binary"},
+		{ID: "tui", Status: "this", Note: "cmd/dentui, Bubble Tea, same event stream"},
 		{ID: "svelte", Status: "this", Note: "live page over SSE, no Node at runtime"},
 		{ID: "sse", Status: "this", Note: "event: state, id, retry 3000, comment keepalive. MDN EventSource"},
 		{ID: "rust", Status: "later", Note: "not this binary"},

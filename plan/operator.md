@@ -1,6 +1,10 @@
 # Operator
 
-The operator is the surface the user talks to. It is the main orchestrator. A TUI and the dashboard are two views of that one operator. They are not two bosses.
+The operator is the surface the user talks to. It is the main orchestrator. The TUI and the web UI are the lowest consumers of `denctl`. They are the harness framework. They are not two bosses.
+
+The TUI is `cmd/dentui`, built with Charmbracelet Bubble Tea and Lip Gloss. It is the admin task manager: services, the nest, and branches ahead of `develop`. It reads `GET /api/events` and paints a frame only when a `state` event arrives. Quit with `q`.
+
+The web UI is the same data with web limits: loopback only, branch names inserted as text, no cookies, no secret in the payload. Plugins come later as local directories. Charmbracelet Crush, Soft Serve, and Fantasy are not this harness. Soft Serve is a Git server, and that stays off this host.
 
 The user says the want once. The operator writes it into the packet, starts the seats, and shows what they are doing. A big leader's jobs live here when a person is at the keyboard: prompt cut, landscape, one skill, and a tiebreak only when a lower tier is not decided.
 
