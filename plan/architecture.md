@@ -16,6 +16,8 @@ radar
 
 A seat never writes fox desired state. A guest never picks the next model. radar is read. The private files in radar stay in radar.
 
+Big leaders sit above the orchestrators. Their job is `plan/leaders.md`: wants, prompt cuts, the deep plan, the landscape, one skill, and a tiebreak only when a lower tier is not decided. Evidence is presented with no slant. A later block labeled `User context` applies the known want. That block is the bias, and it is named.
+
 ## Implement
 
 Each niche ships in this order. Skip a step and the change is not done.
