@@ -1,73 +1,66 @@
 # Append-only store
 
-Draft. Researcher `r3` (grok-4.6) owns this file.
+This section is the store. One writer. Seven fields. Put appends. Query reads what was stored. A lead cut is AppendRefusal, not a new section and not stop. Fast and recent memory are local directories on this machine. The OmniRoute copy is backup. Backup is not the read path.
 
-Implements the decided memory rules: one mesh store, seven fields, later section supersedes, nothing deleted; the append-only progress line (timestamp, task id, state, artifact path, next id); `kb.put` / `kb.query` as store and fetch; `room.say` is not the store; a lead cut of Next keeps the current section and a refusal row.
-
-Grunts `r3g1`–`r3g5` were empty at write. This draft still names the mesh symbols they were assigned: PutKb, QueryKb, refusal row, checkpointer-is-not-store, single writer, empty-write and shrink errors.
+Implements the decided memory rules: one store, later section supersedes, nothing deleted; the append-only progress line; `Put` / `Query` as store and fetch; a lead cut keeps the current section and a refusal row. The archived mesh upsert (`ON CONFLICT DO UPDATE`) is not this store.
 
 ## Module
 
-`SectionStore` sits on `store.Store.PutKb` and `store.Store.QueryKb`. It does not add a second database. Embeddings stay on local port 8091. The LangGraph checkpointer, zvec, OmniMemory, Qwen Memory, Mem0, and `deerflow-memory` are not this store.
+`Store` lives in this directory. Embeddings stay on local port 8091. They do not choose the next section. `room.say` is not the store.
 
-Store gate (notes: graphify, alibaba-platform, alibaba-agents, six notes that leave Rail empty). Superpowers' Rail wait is the first implementation tool, not this put.
+Store gate: Section, Function, Read, Do, Write filled; Next not durable until a lead lets it pass; Rail may be empty. Superpowers' Rail wait is not this put.
 
-Next fetch of a stored section returns the stored seven fields, including Rail when it is set (graphify, AgentScope, Spring). Steer body and ledger body stay out. The ledger is a pointer on `ProgressRow` (superpowers pointer-only, applied to the side record only).
+Query returns the stored seven fields. Steer body and ledger body stay out.
 
 ## Types
 
 ```go
-// SectionRecord is the section. Seven fields, no eighth.
-type SectionRecord struct {
-    Section  SectionID   // stable id, one job
-    Function string      // one sentence
-    Read     []string    // the only files, read-only
-    Do       []string    // steps, in order
-    Write    string      // one mesh kb key; PutSection uses this as KbEntry.Key
-    Next     NextRef     // next section id, or stop; not durable until a lead lets it pass
-    Rail     RailSwitch  // empty, or a switch only the human flips
-}
-
 type SectionID string
+type RailSwitch string
+type TaskID string
 
-// NextRef.Kind is "id", "stop", or "". Empty is unset. "stop" is a clean stop.
 type NextRef struct {
-    Kind string
+    Kind string // "id", "stop", or ""
     ID   SectionID
 }
 
-type RailSwitch string // "" or a named human switch. A seat packet cannot write it.
-
-// ProgressRow is the decided ledger line. One append, never an edit.
-type ProgressRow struct {
-    At       time.Time
-    Task     protocol.TaskID
-    State    string     // stored | cut | commit-refuse | failed | stop
-    Artifact string     // KbEntry.Key or path
-    Next     SectionID  // empty on cut
+type SectionRecord struct {
+    Section  SectionID
+    Function string
+    Read     []string
+    Do       []string
+    Write    string
+    Next     NextRef
+    Rail     RailSwitch
 }
 
-// RefusalRow is a lead cut. Not a new section. Not NEXT stop.
+type ProgressRow struct {
+    At       time.Time
+    Task     TaskID
+    State    string // stored | cut | commit-refuse | failed | stop
+    Artifact string
+    Next     SectionID
+}
+
 type RefusalRow struct {
     At      time.Time
-    Task    protocol.TaskID
+    Task    TaskID
     State   string // cut | commit-refuse
     Refused NextRef
     Reason  string
 }
 
-// MemoryLayer is the decided overlay. A later section supersedes. Nothing is deleted.
 type MemoryLayer struct {
     Tier, Scope, Key, Value, Source string
     Timestamp                       time.Time
 }
 
-type SectionStore interface {
-    PutSection(ctx context.Context, rec SectionRecord) error
-    FetchLatest(ctx context.Context, id SectionID) (SectionRecord, error)
-    AppendProgress(ctx context.Context, row ProgressRow) error
-    AppendRefusal(ctx context.Context, row RefusalRow) error
+type Store struct {
+    root string // local data dir
+    home string // this machine; never BackupRoot
 }
+
+const BackupRoot = "tcp:/opt/harness-memory"
 
 var (
     ErrEmptyWrite    = errors.New("store: Write is empty")
@@ -79,122 +72,120 @@ var (
     ErrDelete        = errors.New("store: delete is refused")
     ErrCutNotStop    = errors.New("store: lead cut is not a clean stop")
     ErrChildWrite    = errors.New("store: child cannot write parent Write, Next, or Rail")
+    ErrNotFound      = errors.New("store: section not found")
+    ErrBackupRead    = errors.New("store: backup is not the read path")
 )
 ```
-
-Wire to mesh types already on disk: `protocol.KbEntry`, `protocol.KbPutParams`, `protocol.KbQueryParams`, `protocol.KbQueryResult`, `protocol.Task`.
 
 ## Functions
 
 ```go
-func (s *sectionStore) PutSection(ctx context.Context, rec SectionRecord) error
-// Requires rec.Section, Function, Read, Do, Write non-empty.
-// Next may be named; it is not durable until a lead lets it pass.
-// Rail may be empty.
-// Key = rec.Write. Body = JSON of the seven fields.
-// Calls store.Store.PutKb. Refuses a second put of the same Section.
-// Refuses a shorter body for an existing key (ErrShrink).
-// Refuses Write == "" (ErrEmptyWrite) and empty JSON (ErrEmptyBody).
-// Does not call store.Store.AppendMessage. Does not call OmniMemory.Remember.
+func Open(root string) (*Store, error)
+// Refuses root under BackupRoot (ErrBackupRead).
 
-func (s *sectionStore) FetchLatest(ctx context.Context, id SectionID) (SectionRecord, error)
-// store.Store.QueryKb by key, latest KbEntry.At.
-// Returns the stored seven fields. Rail rides if it was stored.
-// Does not return a steer line. Does not return a ledger body.
-// A pointer to a ProgressRow is allowed when that row's Task matches.
+func (s *Store) Put(rec SectionRecord) error
+// Requires Section, Function, Read, Do, Write non-empty.
+// Appends one JSONL row of the seven fields. Updates current.
+// Refuses a second put of the same Section (ErrSecondStore).
+// Refuses in-place rewrite of an existing Write key (ErrRewriteCorpus).
+// Refuses a shorter body for that key (ErrShrink).
+// Refuses Write == "" (ErrEmptyWrite). Does not read backup.
 
-func (s *sectionStore) AppendProgress(ctx context.Context, row ProgressRow) error
-// service.EventSink.Append kind "section.progress". JSONL, mutex, fsync.
-// Fields: At, Task, State, Artifact, Next. No delete. No overwrite.
+func (s *Store) Query(id SectionID) (SectionRecord, error)
+// Latest stored record for id. Empty id is current.
+// Returns the seven fields. No steer line. No ledger body.
+// Does not open BackupRoot.
 
-func (s *sectionStore) AppendRefusal(ctx context.Context, row RefusalRow) error
-// service.EventSink.Append kind "section.cut".
-// Stores the refused Next and Reason. Does not PutSection the successor.
-// Current section stays. Returns ErrCutNotStop if State is "stop".
+func (s *Store) AppendRefusal(row RefusalRow) error
+// Appends kind cut | commit-refuse. Current stays.
+// Does not Put a successor. State "stop" is ErrCutNotStop.
 
-func EncodeBody(rec SectionRecord) ([]byte, error) // exactly the seven fields
-func DecodeBody(e protocol.KbEntry) (SectionRecord, error)
+func (s *Store) AppendProgress(row ProgressRow) error
+// One JSONL append: At, Task, State, Artifact, Next. No overwrite.
+
+func (s *Store) ReadFast() ([]MemoryLayer, error)
+// Reads ~/.local/share/harness/memory/fast on this machine.
+
+func (s *Store) ReadRecent() ([]MemoryLayer, error)
+// Reads ~/.local/share/harness/memory/recent on this machine.
+
+func ReadBackup() ([]MemoryLayer, error)
+// Always ErrBackupRead. Backup is not the read path.
+
+func ChildWrite(parent, proposed SectionRecord) error
+func EncodeBody(rec SectionRecord) ([]byte, error) // exactly seven fields
+func DecodeBody(body []byte) (SectionRecord, error)
 ```
-
-Existing mesh calls this module uses, and does not replace:
-
-- `(*store.Store).PutKb(ctx, protocol.KbEntry) error`
-- `(*store.Store).QueryKb(ctx, protocol.KbQueryParams) ([]protocol.KbEntry, error)`
-- `(*jsonlEventLog).Append(ctx, kind string, payload any) error`
-
-Existing mesh calls this module does not use as the section store:
-
-- `(*store.Store).AppendMessage` — `room.say`
-- `(*store.Store).CreateTask` — `task.submit` hands a packet, it does not put a section
-- `agent.OmniMemory.Remember` / `Recall`
 
 ## Invariants
 
-1. One store. One writer (`BEGIN IMMEDIATE` on PutKb). No zvec, no second kb, no checkpointer.
+1. One store. One writer (mutex, append, fsync). No second kb. No checkpointer.
 2. Section record is Section, Function, Read, Do, Write, Next, Rail. No eighth field.
-3. PutSection requires Section, Function, Read, Do, Write. Rail may be empty. Next is not durable until a lead lets it pass.
-4. Same Section id a second time is ErrSecondStore. In-place edit of a stored body is ErrRewriteCorpus. Empty Write is ErrEmptyWrite. Shorter replacement body is ErrShrink. Delete is ErrDelete.
-5. A later Section id supersedes current. The previous kb row stays. Nothing is deleted.
-6. A lead cut of Next calls AppendRefusal, not PutSection. Current section stays. Not a clean stop. Not a new section.
+3. Put requires Section, Function, Read, Do, Write. Rail may be empty. Next is not durable until a lead lets it pass.
+4. Same Section id a second time is ErrSecondStore. In-place edit is ErrRewriteCorpus. Empty Write is ErrEmptyWrite. Shorter replacement body is ErrShrink. Delete is ErrDelete.
+5. A later Section id supersedes current. The previous row stays. Nothing is deleted.
+6. A lead cut of Next calls AppendRefusal, not Put. Current stays. Not a clean stop. Not a new section.
 7. A child packet cannot write the parent's Write, Next, or Rail (ErrChildWrite).
-8. FetchLatest returns the stored section, not steer, not the ledger body. Progress is pointer-only.
-9. Fetch is after store. A query with no prior put has nowhere to live.
-10. Embeddings stay on 8091. They do not choose the next section.
+8. Query returns the stored section, not steer, not the ledger body.
+9. Fetch is after store. Query with no prior Put is ErrNotFound.
+10. Fast and recent memory are local. BackupRoot is never opened to remember.
 
 ## Files
 
-`internal/store/section.go` — this module, on the mesh already at `~/Projects/agent-mesh`.
+- `sections/store/store.go` — Put, Query, AppendRefusal, ReadFast, ReadRecent, ReadBackup
+- `sections/store/store_test.go`
+- `sections/store/LEAD.md` — this file
 
-Wraps `internal/store/store.go` (`PutKb`, `QueryKb`) and `internal/service/eventlog.go` (`Append` into `events.jsonl`). Types `protocol.KbEntry` and `protocol.Task` live in `internal/protocol/protocol.go`. Schema: table `kb` in `internal/store/schema.sql`. Data: mesh `-data` dir, `mesh.db` plus `events.jsonl`.
+Data under the store root: `sections.jsonl`, `refusals.jsonl`, `progress.jsonl`, `current`. Fast memory: `~/.local/share/harness/memory/fast`. Recent: `~/.local/share/harness/memory/recent`. Backup: `tcp:/opt/harness-memory/` via `scripts/backup-fast-memory.sh`. A seat does not read that host.
 
 ## Adopt
 
-Adopt the seven-field record. Write is the one `KbEntry.Key`. Put is `PutKb`. Fetch is `QueryKb`. Progress is one JSONL append of timestamp, task id, state, artifact path, next id.
+Adopt the seven-field record. Write is the one key. Put appends. Query reads the append log. Progress is one JSONL append of timestamp, task id, state, artifact path, next id.
 
-Adopt the store gate from graphify, alibaba-platform, and alibaba-agents: Section, Function, Read, Do, Write filled; Next not durable until a lead; Rail empty allowed. Superpowers' Rail-before-first-tool is not this gate.
+Adopt the store gate: Section, Function, Read, Do, Write filled; Next not durable until a lead; Rail empty allowed.
 
-Adopt the lead-cut rule already repeated in the plan: mesh keeps the current section and a refusal row. Lead does not write the corpus.
+Adopt the lead-cut rule: mesh keeps the current section and a refusal row. Lead does not write the corpus.
 
-Adopt the stored-section fetch from graphify, AgentScope, and Spring: Rail rides with the section when stored. Steer and ledger bodies stay out. Superpowers pointer-only applies to `ProgressRow`, not to dropping Rail from the record.
+Adopt local fast and recent as the recall path. Adopt backup as copy-only.
 
 ## Refuse
 
-Refuse an eighth field. Refuse `room.say` / `AppendMessage` as the store. Refuse OmniMemory, Qwen Memory, Mem0, zvec, Graphify-as-memory, `deerflow-memory`, LangGraph checkpointer, rtp-llm prefix cache, and AirLLM as this store.
-
-Refuse a second store of the same Section, an empty Write, a shrink, a delete, and an in-place corpus rewrite.
+Refuse an eighth field. Refuse `room.say` as the store. Refuse a second store of the same Section, an empty Write, a shrink, a delete, and an in-place corpus rewrite.
 
 Refuse treating a lead cut as NEXT stop or as a new section.
 
-Refuse a child or a lead writing the parent's Write, Next, or Rail.
+Refuse a child writing the parent's Write, Next, or Rail.
 
 Refuse putting the steer line or the ledger body into `SectionRecord`.
 
 Refuse the mesh choosing a model.
 
+Refuse reading `tcp:/opt/harness-memory` to remember.
+
 ## Types
 
-`SectionRecord`, `SectionID`, `NextRef`, `RailSwitch`, `ProgressRow`, `RefusalRow`, `MemoryLayer`, `SectionStore`, `protocol.KbEntry`, `protocol.Task`
+`SectionRecord`, `SectionID`, `NextRef`, `RailSwitch`, `ProgressRow`, `RefusalRow`, `MemoryLayer`, `Store`
 
 ## Functions
 
-`PutSection`, `FetchLatest`, `AppendProgress`, `AppendRefusal`, `EncodeBody`, `DecodeBody`, `store.Store.PutKb`, `store.Store.QueryKb`, `jsonlEventLog.Append`
+`Open`, `Put`, `Query`, `AppendRefusal`, `AppendProgress`, `ReadFast`, `ReadRecent`, `ReadBackup`, `ChildWrite`, `EncodeBody`, `DecodeBody`
 
 ## Invariants
 
-One store, seven fields, append-only progress, later supersedes, no delete, cut is refusal not stop.
+One store, seven fields, append-only progress, later supersedes, no delete, cut is refusal not stop, fast memory local, backup is not the read path.
 
 ## File path
 
-`internal/store/section.go`
+`sections/store/store.go`
 
 ## Adopt or refuse, against the seven fields already in plan.md
 
 | Field | Store |
 | --- | --- |
-| Section | required on PutSection; key identity; second put refused |
-| Function | required on PutSection |
-| Read | required on PutSection; stored, not executed here |
-| Do | required on PutSection; stored, not executed here |
-| Write | required; the one `KbEntry.Key` |
-| Next | stored as id or stop; not durable until a lead lets it pass; a cut is AppendRefusal, not this field becoming stop |
+| Section | required on Put; key identity; second put refused |
+| Function | required on Put |
+| Read | required on Put; stored, not executed here |
+| Do | required on Put; stored, not executed here |
+| Write | required; the one key |
+| Next | stored as id or stop; a cut is AppendRefusal, not this field becoming stop |
 | Rail | stored with the section when set; may be empty; seat cannot write it |
