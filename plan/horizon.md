@@ -16,6 +16,7 @@ den is a long-horizon harness. A seat can leave and come back. The work is still
 | Model-aware | The packet names a model id. A combo runs only when the packet names it. | `plan/omniroute.md` |
 | Token-aware | The leader cuts the prompt to the section, one skill body, and the named tools. | `skills/use-harness/references/optimise.md` |
 | Omni-aware | Batch, A2A, and MCP stay off unless `plan/omniroute.md` says yes. Embeddings stay on port 8091. | `plan/omniroute.md` |
+| Structure-aware | A named structure from LangChain, LangGraph, Deep Agents, or OpenViking may be used. It does not become the bus. | `plan/structures.md` |
 
 ## Loop
 
