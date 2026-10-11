@@ -17,7 +17,7 @@ func TestSlotsAreOneList(t *testing.T) {
 			t.Fatalf("%s status %s", slot.ID, slot.Status)
 		}
 	}
-	if !seen["go"] || !seen["svelte"] || !seen["dry"] {
+	if !seen["go"] || !seen["svelte"] || !seen["sse"] || !seen["dry"] {
 		t.Fatal("missing this-build slots")
 	}
 	for _, id := range []string{"react", "shadcn", "cloudflare", "hetzner", "scaleblade"} {
