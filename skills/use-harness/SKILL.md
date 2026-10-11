@@ -18,6 +18,8 @@ The model call is a direct model id. OmniRoute is a tool you name. It is not the
 | Run a command in a worker VM, join the society | `references/workers.md` |
 | Call OmniRoute, Hetzner, Cloudflare, or another named tool | `references/tools.md` |
 | Optimise a prompt, evaluate, rediscover, or onboard | `references/optimise.md` |
+| Pick the one skill a seat should carry | `../select-skill/SKILL.md` |
+| Fill a niche from the map | `../../plan/niches/INDEX.md` |
 
 ## Before any write
 
