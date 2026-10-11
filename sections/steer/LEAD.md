@@ -1,90 +1,56 @@
 # Steer without killing the run
 
-Draft. Researcher `r9` (grok-4.5) owns this file.
+This section is live steer. A steer line enters the live step. The run is not cancelled. The in-flight tool finishes. Wider read root, push, and delete stay shut until a human opens one.
 
-Implements decided plan §6 Rails and steer-docs: a steer line enters the live step; the run is not cancelled; the in-flight action finishes. Wider read root, push, and delete stay shut until a human opens one.
+Implements decided plan §6 Rails and steer-docs. Grunt files `r9g1` through `r9g5` had empty claims. No grunt sentence is followed.
 
 ## Module
 
-Live steer and human rail objects on the mesh. Not a second bus. Not a model chooser.
+`ApplySteer` and `FinishInFlight` live in this directory. Not a second bus. Not a model chooser. SteerLine, SideRecord, and Section.Rail stay three objects.
 
 ## Types
 
-```go
-type SteerLine struct {
-    TaskID    string
-    Text      string
-    At        time.Time
-}
+Defined in `sections/steer/steer.go`.
 
-type SideRecord struct {
-    TaskID string
-    Kind   string // approval | reject | ruling | refuse
-    Body   string
-    At     time.Time
-}
+`SteerLine` is `TaskID`, `Text`, and `At`. It is a live human utterance. It is not a section field.
 
-type LedgerPointer struct {
-    EntryID string // touches this task only
-}
+`SideRecord` is `TaskID`, `Kind`, `Body`, and `At`. Kind is `approval`, `reject`, `ruling`, or `refuse`. It is not Rail.
 
-type RailSwitch string // "" | human-set token; never seat-written
+`LedgerPointer` is `EntryID` only. Body is never included.
 
-type Section struct {
-    Section  string
-    Function string
-    Read     []string
-    Do       []string
-    Write    string
-    Next     string
-    Rail     RailSwitch
-}
+`RailSwitch` is `""` or a named switch only the human flips.
 
-type LiveStep struct {
-    TaskID   string
-    Section  Section
-    InFlight *ToolCall // nil when idle
-    Steer    *SteerLine
-}
+`Section` holds the seven fields: `Section`, `Function`, `Read`, `Do`, `Write`, `Next`, `Rail`. No eighth field.
 
-type NextFetch struct {
-    Section Section        // Rail rides when already stored (may be "")
-    Ledger  *LedgerPointer // optional; body never included
-    // no SteerLine, no SideRecord body
-}
+`ToolCall` is the in-flight tool: `Name`, `Args`, `Output`, `Err`.
 
-type CommitGrant struct {
-    WidenRead bool
-    Push      bool
-    Delete    bool
-}
-```
+`ToolResult` is `Name`, `Output`, and `Err` after the tool completes.
+
+`LiveStep` is `TaskID`, `Section`, `InFlight`, and `Steer`. `InFlight` is nil when idle.
+
+`NextFetch` is the stored `Section` (Rail as stored) and an optional `LedgerPointer`. It has no SteerLine and no SideRecord body.
+
+`CommitGrant` is `WidenRead`, `Push`, and `Delete`. Default all false until a human sets one.
+
+`Human` marks a human-only call.
 
 ## Functions
 
-```go
-func ApplySteer(step *LiveStep, line SteerLine) error
-// Attach line to the live step. Does not cancel. Does not open a new section.
+`ApplySteer(step *LiveStep, line SteerLine) error` attaches the line to the live step. It does not cancel. It does not clear `InFlight`. It does not change `Section` and does not open a new section. Empty text is `ErrEmptyLine`. A TaskID mismatch is `ErrTaskMismatch`.
 
-func FinishInFlight(step *LiveStep) (*ToolResult, error)
-// In-flight tool completes before the steer text is applied to later calls.
+`FinishInFlight(step *LiveStep) (*ToolResult, error)` completes the in-flight tool and clears `InFlight`. It does not clear `Steer`. It does not change `Section`. It is not a cancel. Idle is `ErrIdle`. A tool error is returned after `InFlight` is cleared so a later call can see the steer.
 
-func InjectSpectatorLine(step *LiveStep, line SteerLine) error
-// Mid-run human line. Same path as ApplySteer. No halt. No new Section id.
+`InjectSpectatorLine(step *LiveStep, line SteerLine) error` is the mid-run human line. Same path as `ApplySteer`. No halt. No new Section id.
 
-func WriteSideRecord(human Human, rec SideRecord) error
-// Human only. Seat packet path returns refuse.
+`WriteSideRecord(human Human, rec SideRecord) error` is human only. A seat path returns `ErrSeatAuthority` / `ErrNilHuman`.
 
-func FlipRail(human Human, sec *Section, sw RailSwitch) error
-// Human only. Empty is legal. Seat or prompt cannot flip.
+`FlipRail(human Human, sec *Section, sw RailSwitch) error` is human only. Empty is legal. Seat or prompt cannot flip.
 
-func FetchNext(store Store, id string) (NextFetch, error)
-// Returns stored Section (Rail included as stored). Optional LedgerPointer
-// when a side entry touches this task. Omits SteerLine and SideRecord bodies.
+`FetchNext(sec Section, ledger *LedgerPointer) (NextFetch, error)` returns the stored section (Rail included as stored) and an optional ledger pointer. Omits SteerLine and SideRecord bodies.
 
-func ApproveCommit(human Human, g CommitGrant) error
-// Opens widen / push / delete. Default all false until human sets one.
-```
+`ApproveCommit(human Human, g CommitGrant) error` opens widen / push / delete. Human only.
+
+`SeatApproveCommit(g CommitGrant) error` always refuses. Delete is `ErrDeleteGrant`; any other seat grant is `ErrSeatAuthority`.
 
 ## Invariants
 
@@ -94,11 +60,15 @@ func ApproveCommit(human Human, g CommitGrant) error
 - A seat packet cannot write SideRecord, cannot FlipRail, cannot ApproveCommit.
 - FetchNext never returns SteerLine or SideRecord.Body; ledger is pointer-only.
 - Rail rides with the stored section (empty or switch). Notes followed: graphify, alibaba-agents, alibaba-platform. Refuse topics putting the live steer line into NextFetch.
-- No eighth section field. Marked draft until a second finished note states the same and no lead cuts it.
+- No eighth section field.
 
 ## Files
 
-`mesh/steer.go`
+- `sections/steer/steer.go` — ApplySteer, FinishInFlight, InjectSpectatorLine
+- `sections/steer/steer_test.go`
+- `sections/steer/LEAD.md` — this file
+
+The symbols are not added to `agent-mesh`.
 
 ## Adopt
 
@@ -116,3 +86,31 @@ func ApproveCommit(human Human, g CommitGrant) error
 - Topics rule that NextFetch carries the live steer line.
 - Growing Section past the seven fields.
 - Any seat delete grant.
+
+## Types
+
+`SteerLine`, `SideRecord`, `LedgerPointer`, `RailSwitch`, `Section`, `ToolCall`, `ToolResult`, `LiveStep`, `NextFetch`, `CommitGrant`, `Human`
+
+## Functions
+
+`ApplySteer`, `FinishInFlight`, `InjectSpectatorLine`, `WriteSideRecord`, `FlipRail`, `FetchNext`, `ApproveCommit`, `SeatApproveCommit`
+
+## Invariants
+
+Steer enters the live step; in-flight finishes; not a cancel; three objects; seat cannot flip Rail or write SideRecord; NextFetch omits steer and side-record bodies.
+
+## File path
+
+`sections/steer/steer.go`
+
+## Adopt or refuse, against the seven fields already in plan.md
+
+| Field | Steer |
+| --- | --- |
+| Section | unchanged by ApplySteer and FinishInFlight; no successor opened |
+| Function | unchanged |
+| Read | unchanged |
+| Do | unchanged |
+| Write | unchanged; not a side-record body |
+| Next | unchanged; steer is not Next |
+| Rail | human FlipRail only; not a SteerLine; rides on NextFetch when stored |
