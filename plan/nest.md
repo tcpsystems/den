@@ -40,7 +40,7 @@ Do not add a Git server in front of GitHub. Local commits and `git push` to `tcp
 
 Do not add an Obsidian server yet. No vault is named. Harness memory is local files plus OpenViking. If a person later wants the same notes on a phone, a git vault is enough. A sync server on tcp.systems competes with OmniRoute for the 32 GB.
 
-The RX 6600 is in this workstation, not in the ARM host. The OmniRoute machine cannot see that GPU. Embeddings stay on `127.0.0.1:8091`. If that server is down, the seat waits. It does not fall through to a cloud embedder, and it does not ask tcp.systems to borrow the card. A tailnet URL to this machine would publish the embedder beyond loopback. Do not add that.
+The RX 6600 stays in this workstation. `tcp.systems` is on the same Headscale network (`100.64.0.3` to this host `100.64.0.2`). The embedder process listens on `127.0.0.1:8091`. Tailscale Serve publishes that port to the tailnet only, at `http://core.ts.tcp.systems:8091`. A request from tcp to that name returns 200. The raw tailnet IP returns 404, so callers use the name. It is not on the public internet. Seats on this machine keep using `127.0.0.1:8091`. If the workstation embedder is down, tcp cannot invent a GPU. It does not fall through to a cloud embedder.
 
 ## Stateless
 
