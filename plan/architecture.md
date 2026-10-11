@@ -1,5 +1,7 @@
 # Architecture
 
+The base is `plan/BASE.md`. This page is detail under it. Extend `BASE.md` only by a section branch and a check.
+
 den is a seat harness. tcp.systems is the system it folds into. Foxcore is the company that system operates. The three do not share a brain.
 
 ```
