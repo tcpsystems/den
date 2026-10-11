@@ -74,7 +74,10 @@ function paint(data) {
   }
 }
 const stream = new EventSource("/api/events");
-stream.onmessage = (ev) => paint(JSON.parse(ev.data));
+stream.addEventListener("state", (ev) => paint(JSON.parse(ev.data)));
+stream.onerror = () => {
+  document.title = "den controller (reconnecting)";
+};
 </script>
 </body>
 </html>

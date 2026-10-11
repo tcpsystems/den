@@ -53,9 +53,17 @@ func serve(addr, repo string) error {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
+		// MDN event stream: text/event-stream, fields split by a blank line.
+		// A leading colon is a comment and keeps the connection alive when
+		// no state event is due. retry is the reconnect delay in milliseconds.
+		fmt.Fprintf(w, "retry: 3000\n\n")
+		flusher.Flush()
 		tick := time.NewTicker(200 * time.Millisecond)
+		keep := time.NewTicker(15 * time.Second)
 		defer tick.Stop()
+		defer keep.Stop()
 		var last string
+		var id int
 		send := func() bool {
 			payload, err := stateJSON(r.Context(), repo)
 			if err != nil {
@@ -66,7 +74,8 @@ func serve(addr, repo string) error {
 				return true
 			}
 			last = current
-			fmt.Fprintf(w, "data: %s\n\n", payload)
+			id++
+			fmt.Fprintf(w, "id: %d\nevent: state\ndata: %s\n\n", id, payload)
 			flusher.Flush()
 			return true
 		}
@@ -77,6 +86,9 @@ func serve(addr, repo string) error {
 			select {
 			case <-r.Context().Done():
 				return
+			case <-keep.C:
+				fmt.Fprintf(w, ": keepalive\n\n")
+				flusher.Flush()
 			case <-tick.C:
 				if !send() {
 					return
