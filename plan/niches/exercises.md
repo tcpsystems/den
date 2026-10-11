@@ -11,7 +11,7 @@ Two seats play. The hill is one control. The score is whether that control held.
 | Premise | One sentence of what an attacker would want, and which owned host | Steps, commands, payloads, packet captures, or a bypass |
 | Defense | The control, the test that shows it holds, and the result | A weaker rule, a deleted limit, or a way around the control |
 
-The premise is the attacker thought, kept to intent and impact. The defense is the function and the test. Together they are the writeup.
+The premise is the attacker thought, kept to intent and impact. The defense is the function. The match runs: the premise seat submits the disallowed action to that function, and the defense seat returns the refusal. The spectator writeup is those two actions. It is produced by `sections/security/match.py`.
 
 ## Owned range
 
