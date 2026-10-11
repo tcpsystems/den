@@ -42,3 +42,18 @@ The leader writes one packet:
 - Rail: empty unless the human flipped it
 
 Then the orchestrator runs. The leader does not sit inside the tool loop.
+
+## When a seat is unsure
+
+A section seat may define another seat, or ask the orchestrator for one. That seat is a crutch. It finds sources. It does not decide the line and it does not take the section.
+
+Two crutches:
+
+| Crutch | Reads | Returns |
+| --- | --- | --- |
+| Explore | The landscape: repos, tools, and notes already named | A list of paths and URLs. No recommendation. |
+| Deep dive | One of those paths, plus fast memory, recent memory, and OpenViking | The passages that bear on the question, each with its source. |
+
+The section seat writes the ask in its packet under Do: the question, and which crutch. The orchestrator starts that seat with its own packet. Read is the question and the stores. Write is one note. Next is the asking seat. The crutch stops.
+
+The asking seat reads the note. If the note answers, the seat continues. If it does not, the line stays undecided. The seat does not invent the answer, and it does not call a second crutch on the same question. A big leader tiebreaks only after that, with one skill, on the note that is already written.

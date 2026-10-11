@@ -18,6 +18,8 @@ A seat never writes fox desired state. A guest never picks the next model. radar
 
 Big leaders sit above the orchestrators. Their job is `plan/leaders.md`: wants, prompt cuts, the deep plan, the landscape, one skill, and a tiebreak only when a lower tier is not decided. Evidence is presented with no slant. A later block labeled `User context` applies the known want. That block is the bias, and it is named.
 
+A section seat that is unsure asks the orchestrator for one crutch. Explore lists sources. Deep dive reads those sources plus local memory and returns passages. The crutch does not decide. One ask per question.
+
 ## Implement
 
 Each niche ships in this order. Skip a step and the change is not done.
