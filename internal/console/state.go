@@ -37,7 +37,7 @@ func Slots() []Slot {
 	return []Slot{
 		{ID: "go", Status: "this", Note: "API binary"},
 		{ID: "svelte", Status: "this", Note: "live page over SSE, no Node at runtime"},
-		{ID: "sse", Status: "this", Note: "GET /api/events pushes state every 5s"},
+		{ID: "sse", Status: "this", Note: "GET /api/events pushes a frame only when state changes"},
 		{ID: "rust", Status: "later", Note: "not this binary"},
 		{ID: "typescript", Status: "later", Note: "fox panel language, not the controller"},
 		{ID: "javascript", Status: "later", Note: "only where a page already uses it"},

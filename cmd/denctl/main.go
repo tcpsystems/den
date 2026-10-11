@@ -53,13 +53,19 @@ func serve(addr, repo string) error {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Header().Set("Cache-Control", "no-cache")
 		w.Header().Set("Connection", "keep-alive")
-		tick := time.NewTicker(5 * time.Second)
+		tick := time.NewTicker(200 * time.Millisecond)
 		defer tick.Stop()
+		var last string
 		send := func() bool {
 			payload, err := stateJSON(r.Context(), repo)
 			if err != nil {
 				return false
 			}
+			current := string(payload)
+			if current == last {
+				return true
+			}
+			last = current
 			fmt.Fprintf(w, "data: %s\n\n", payload)
 			flusher.Flush()
 			return true
