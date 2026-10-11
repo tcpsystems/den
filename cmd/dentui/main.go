@@ -2,11 +2,15 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -16,30 +20,40 @@ import (
 )
 
 func main() {
-	url := flag.String("url", "http://127.0.0.1:8793/api/events", "denctl event stream")
+	home, _ := os.UserHomeDir()
+	sock := flag.String("sock", filepath.Join(home, ".local", "share", "harness", "den.sock"), "daemon unix socket")
 	flag.Parse()
-	if _, err := tea.NewProgram(newModel(*url)).Run(); err != nil {
+	if _, err := tea.NewProgram(newModel(*sock)).Run(); err != nil {
 		fmt.Println(err)
 	}
 }
 
+func client(sock string) *http.Client {
+	return &http.Client{Transport: &http.Transport{
+		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			var d net.Dialer
+			return d.DialContext(ctx, "unix", sock)
+		},
+	}}
+}
+
 type model struct {
-	url    string
+	sock   string
 	sub    chan tea.Msg
 	state  console.State
 	err    string
 	status string
 }
 
-func newModel(url string) model {
-	return model{url: url, sub: make(chan tea.Msg), status: "connecting"}
+func newModel(sock string) model {
+	return model{sock: sock, sub: make(chan tea.Msg), status: "connecting"}
 }
 
 type stateMsg struct{ state console.State }
 type errMsg struct{ err string }
 
 func (m model) Init() tea.Cmd {
-	go readEvents(m.url, m.sub)
+	go readEvents(m.sock, m.sub)
 	return wait(m.sub)
 }
 
@@ -47,9 +61,16 @@ func wait(sub chan tea.Msg) tea.Cmd {
 	return func() tea.Msg { return <-sub }
 }
 
-func readEvents(url string, sub chan tea.Msg) {
+func readEvents(sock string, sub chan tea.Msg) {
+	c := client(sock)
 	for {
-		resp, err := http.Get(url)
+		req, err := http.NewRequest(http.MethodGet, "http://den/api/events", nil)
+		if err != nil {
+			sub <- errMsg{err.Error()}
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		resp, err := c.Do(req)
 		if err != nil {
 			sub <- errMsg{err.Error()}
 			time.Sleep(3 * time.Second)

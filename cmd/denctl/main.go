@@ -19,15 +19,16 @@ import (
 var page embed.FS
 
 func main() {
-	addr := flag.String("addr", "127.0.0.1:8793", "loopback listen address")
+	addr := flag.String("addr", "127.0.0.1:8793", "loopback listen address for the browser")
+	sock := flag.String("sock", defaultSock(), "unix socket presented to local clients")
 	repo := flag.String("repo", ".", "git repository to read")
 	flag.Parse()
-	if err := serve(*addr, *repo); err != nil {
+	if err := serve(*addr, *sock, *repo); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func serve(addr, repo string) error {
+func serve(addr, sock, repo string) error {
 	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
 		return err
@@ -96,9 +97,18 @@ func serve(addr, repo string) error {
 			}
 		}
 	})
-	server := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
-	log.Printf("denctl %s", addr)
-	return server.ListenAndServe()
+	errc := make(chan error, 2)
+	go func() { errc <- listenUnix(sock, mux) }()
+	go func() {
+		ln, err := net.Listen("tcp", addr)
+		if err != nil {
+			errc <- err
+			return
+		}
+		errc <- (&http.Server{Handler: mux, ReadHeaderTimeout: 5 * time.Second}).Serve(ln)
+	}()
+	log.Printf("denctl sock %s web %s", sock, addr)
+	return <-errc
 }
 
 func writeState(w http.ResponseWriter, r *http.Request, repo string) {

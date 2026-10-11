@@ -2,7 +2,9 @@
 
 The operator is the surface the user talks to. It is the main orchestrator. The TUI and the web UI are the lowest consumers of `denctl`. They are the harness framework. They are not two bosses.
 
-The TUI is `cmd/dentui`, built with Charmbracelet Bubble Tea and Lip Gloss. It is the admin task manager: services, the nest, and branches ahead of `develop`. It reads `GET /api/events` and paints a frame only when a `state` event arrives. Quit with `q`.
+The daemon is `cmd/denctl`. Checks, queues, and internal tooling belong there. It presents a Unix socket at `~/.local/share/harness/den.sock`, mode 0600. The TUI dials that socket. The browser cannot dial a Unix socket, so the same handlers are also on `127.0.0.1:8793` for the web UI only. Neither client holds the git reads or the probes.
+
+The TUI is `cmd/dentui`, built with Charmbracelet Bubble Tea and Lip Gloss. It is the admin task manager: services, the nest, and branches ahead of `develop`. It reads the socket's event stream and paints a frame only when a `state` event arrives. Quit with `q`.
 
 The web UI is the same data with web limits: loopback only, branch names inserted as text, no cookies, no secret in the payload. Plugins come later as local directories. Charmbracelet Crush, Soft Serve, and Fantasy are not this harness. Soft Serve is a Git server, and that stays off this host.
 
