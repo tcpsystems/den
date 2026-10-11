@@ -1,0 +1,43 @@
+# Protocol
+
+This repo is the software design of the harness in `plan.md`. It is not a second plan. It is not a running service.
+
+## What to write
+
+Write types, functions, invariants, file paths, and refusal rules. A note that only retells a vendor is not done. End every note with:
+
+- Types
+- Functions
+- Invariants
+- File path
+- Adopt or refuse, against the seven fields already in `plan.md`: Section, Function, Read, Do, Write, Next, Rail
+
+## What not to do
+
+- Do not edit `plan.md` in this repo. Proposals go in your own file.
+- Do not delete. Do not rewrite a decided line. Decided text is Architecture through Seat expansion in `plan.md`.
+- Do not build a server, a container, or a second bus.
+- Do not choose a model inside the mesh. The mesh is bus, store, and fetch.
+- Do not mention quotas, auth failures, or the retired project name.
+- A sentence is decided only when two finished notes state it and no lead cuts it. Mark your lines as drafts.
+
+## Git
+
+You are on your own branch in your own worktree. Commit only the files named in your assignment.
+
+```
+git add <your files>
+git commit -m "<id>: <one line>"
+```
+
+Do not push. Do not merge. Do not commit other branches' files.
+
+## Nested workers
+
+This host cannot let a researcher start its own sessions. The five grunt branches for each researcher are already open. Grunts write their own files. Researchers write the section lead. A later merge reads the branches.
+
+## Opens already on the table
+
+- Next fetch: Superpowers keeps steer, ledger, and Rail bodies out, pointer only. Graphify, AgentScope, and Spring let the Rail switch ride with the section.
+- Gate: six notes leave Rail empty. Superpowers waits for human approval before the first implementation tool.
+Pick one software rule if your assignment asks. Say which notes you followed. Do not pretend both won.
