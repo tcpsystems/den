@@ -23,14 +23,16 @@ Write types, functions, invariants, file paths, and refusal rules. A note that o
 
 ## Git
 
-You are on your own branch in your own worktree. Commit only the files named in your assignment.
+You are on your own branch in your own worktree. Commit only the file named in your assignment.
 
 ```
-git add <your files>
+git add <your file>
 git commit -m "<id>: <one line>"
 ```
 
-Do not push. Do not merge. Do not commit other branches' files.
+That commit is then landed on local `main` by `scripts/land-on-main.sh`. The land runs only when the diff is exactly your file. It refuses any other path, including `plan.md` and another worker's file. A conflict aborts. Nothing is pushed.
+
+Do not edit `plan.md`. A later sweep reads the landed diffs and reconciles regions into `plan.md`.
 
 ## Nested workers
 
