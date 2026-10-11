@@ -78,4 +78,6 @@ Every niche file copies the limits that apply to it:
 
 ## Hypotheticals
 
-A hypothetical is a written lesson and a test of our own defense. The method is `plan/niches/hypotheticals.md`. It is not an attack procedure. The test checks that the control holds. It does not build the thing the control is there to stop.
+A hypothetical is a written lesson and a test of our own defense. The method is `plan/niches/hypotheticals.md`. A match between a premise seat and a defense seat is `plan/niches/exercises.md`. The hill is one control. The score is whether that control held.
+
+The premise records intent and impact in one sentence. The defense records the function and the test. Neither seat writes steps, commands, or payloads. Safety limits are copied into the note. They are not dropped.
