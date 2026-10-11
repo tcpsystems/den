@@ -34,6 +34,14 @@ The skill, the guard, and the tool belong to the project. The project sits in th
 | Controller Start/Stop | not built |
 | Sentry, D1, Workers, QUIC, WebSocket | named slots, not wired |
 
+## What not to host on tcp
+
+Do not add a Git server in front of GitHub. Local commits and `git push` to `tcpsystems/den` and `foxcore-cloud/*` are the flow. A Forgejo or Gitea on the OmniRoute host would be a second remote to patch, back up, and keep private. Private GitHub repos already cover radar.
+
+Do not add an Obsidian server yet. No vault is named. Harness memory is local files plus OpenViking. If a person later wants the same notes on a phone, a git vault is enough. A sync server on tcp.systems competes with OmniRoute for the 32 GB.
+
+The RX 6600 is in this workstation, not in the ARM host. The OmniRoute machine cannot see that GPU. Embeddings stay on `127.0.0.1:8091`. If that server is down, the seat waits. It does not fall through to a cloud embedder, and it does not ask tcp.systems to borrow the card. A tailnet URL to this machine would publish the embedder beyond loopback. Do not add that.
+
 ## Stateless
 
 Each event recomputes state from git and the probes. The server keeps the last payload only to skip a duplicate frame. It does not keep a session.
