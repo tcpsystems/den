@@ -1,6 +1,6 @@
 # Controller plan
 
-This is the plan for the den controller. It is not the implementation. The Python page on `127.0.0.1:8792` is a sketch. Do not grow it. The orchestrator starts only after this note is the packet.
+The minimal controller is `cmd/denctl`. It is a Go binary and one static page. Listen address defaults to `127.0.0.1:8793` so it does not share a port with the Python sketch on `8792`. Do not grow the sketch. Expansion is a slot in `internal/console/state.go`, not a second framework.
 
 ## Want
 
