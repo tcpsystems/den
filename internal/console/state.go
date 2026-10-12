@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"sync"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 )
 
