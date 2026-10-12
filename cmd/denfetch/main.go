@@ -17,6 +17,10 @@ import (
 	"github.com/tcpsystems/den/internal/fetch"
 )
 
+func refusePrivate(raw string) error {
+	return fetch.Public(raw)
+}
+
 func main() {
 	readN := flag.Int("read", 0, "after a search, read this many public pages (max 4)")
 	flag.Parse()
