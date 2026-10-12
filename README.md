@@ -2,6 +2,24 @@
 
 Den is the production-grade, token-aware agentic runtime and control plane for local execution, runtime MCP multiplexing, operator TUI observability, and ephemeral permission leasing. It provides isolated workspace sandboxing, strict path-jail boundaries, and multi-model routing via OmniRoute.
 
+## Measured state
+
+Measured on 2026-10-12 at commit `4e70e6f`:
+
+| Metric | Value |
+| --- | ---: |
+| Skills | 28 |
+| Go files | 56 |
+| Plan documents | 39 |
+| Niche rows | 58 |
+| Commits | 88 |
+| Focused tests | `denctl`, `dencat`, and `catalog` passed |
+| Embedder | Qwen3-Embedding-8B-Q6_K, 4096 dimensions, healthy |
+| Long memory | OpenViking v0.5.0, healthy |
+| Local memory files | 2 files, 8 KB |
+
+Accuracy, quality, and expansion are not given percentages here. They need a repeated benchmark before a score is published.
+
 ## Repository Scope & Ecosystem Boundary
 
 - **`den` (This Repository)**: The local runtime daemon (`denctl`), operator TUI (`dentui`), read/fetch utilities (`denread`, `denfetch`), core process supervisor (`initd`), security guardrails (`path_jail`), and persistent state ledgers.
