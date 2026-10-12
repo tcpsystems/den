@@ -40,8 +40,27 @@ function paint(state) {
   for (const project of state.projects || []) projects.append(row(project.name, project.status));
 }
 const events = new EventSource("/api/events");
-events.addEventListener("state", event => { document.getElementById("live").textContent = "live"; paint(JSON.parse(event.data)); });
-events.onerror = () => { document.getElementById("live").textContent = "reconnecting"; };
+let sseOk = false;
+let pollTimer = null;
+function loadOnce() {
+  fetch("/api/state").then(r => r.json()).then(state => {
+    if (sseOk) return;
+    paint(state);
+    document.getElementById("live").textContent = "live (poll)";
+  }).catch(() => {});
+}
+function startPoll() {
+  if (pollTimer) return;
+  setTimeout(loadOnce, 1200);
+  pollTimer = setInterval(loadOnce, 5000);
+}
+events.addEventListener("state", event => {
+  sseOk = true;
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  document.getElementById("live").textContent = "live";
+  paint(JSON.parse(event.data));
+});
+events.onerror = () => { document.getElementById("live").textContent = "reconnecting"; startPoll(); };
 </script>
 </body>
 </html>
