@@ -9,15 +9,18 @@ Run `scripts/readme-metrics.sh` to refresh this block from the repo and live che
 <!-- metrics:start -->
 | Metric | Value |
 | --- | ---: |
-| Commit | `5bf93bb` |
+| Commit | `192e617` |
 | Skills | 28 |
-| Go files | 56 |
+| Go files | 55 |
 | Plan documents | 39 |
 | Niche rows | 58 |
-| Commits | 89 |
+| Commits | 92 |
 | Embedder | healthy |
 | Long memory | healthy |
 | Local memory files | 2 |
+| Worker clusters | 28 |
+| Worker files | 106 |
+| Free models verified | 0 |
 <!-- metrics:end -->
 
 The embedder is Qwen3-Embedding-8B-Q6_K at 4096 dimensions. Accuracy and quality percentages stay unpublished until a repeated benchmark records them.
@@ -36,6 +39,14 @@ The embedder is Qwen3-Embedding-8B-Q6_K at 4096 dimensions. Accuracy and quality
 3. **Ephemeral Permissions**: Time-bounded permission leasing with automatic TTL revocation. Agents start with minimal privileges and must request explicit temporary grants with documented operational justifications.
 4. **Skill & Niche Bundling**: High-frequency core skills are injected directly into active worker contexts; niche or specialized skills are deferred and retrieved via runtime discovery.
 5. **Persistence & Resilience**: All consensus records, analysis summaries, and state trees are stored as immutable flat Markdown and JSON ledgers on disk, ensuring seamless recovery and state reconciliation across OpenViking or embedder rebuilds.
+
+## Consensus and clusters
+
+A cluster fans a single task out to N concurrent cheap or free LLM workers, typically through an OmniRoute-style OpenAI-compatible gateway. Each worker is a plain HTTPS chat-completions call: not a subagent, not a git identity, and not a Den seat. Workers run in parallel — goroutines or background shell jobs — receive the same task spec, and write raw text or code into a scratch directory. They do not coordinate with one another.
+
+The orchestrator is a human or a capable model, never a worker. It reads every worker's output, compares them, and produces one consensus result per task by voting or merging. The majority answer wins; ties and substantive disagreements are reconciled manually, with the reason documented.
+
+Workers never run `git commit` and never push. Only the orchestrator applies the consensus into the working tree, and only the orchestrator or a human commits, after checks such as `go test ./...` pass. This is distinct from the wave/seat worktree pattern in `internal/orch`: clusters are for cheap exploratory work, duplicate detection, and drafts; seats are for the real, git-committing swarm.
 
 ## Quick Start & Build
 
