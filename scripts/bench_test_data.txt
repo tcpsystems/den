@@ -1,0 +1,9 @@
+# Baseline measurements from scripts/bench.sh
+# host: core (local dev box), repo: harness-plan @ wave/20261012-codemap
+# denctl built fresh via `go build -o /tmp/denctl-k ./cmd/denctl`, 50 sequential
+# GET /api/state requests over a self-started instance on 127.0.0.1:18793
+2026-10-12T14:28:56Z state_p50_ms=147.595
+2026-10-12T14:28:56Z state_p95_ms=188.533
+2026-10-12T14:28:56Z state_samples=50
+2026-10-12T14:28:56Z load_skills_ms=0.598
+2026-10-12T14:28:56Z clusters_scan_ms=0.462
