@@ -24,4 +24,3 @@ func TestOpenAPIIsLoopbackOnly(t *testing.T) {
 		t.Fatalf("%d %s", rec.Code, rec.Body.String())
 	}
 }
-

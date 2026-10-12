@@ -8,9 +8,9 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"os"
-	"path/filepath"
 	"time"
+
+	"github.com/tcpsystems/den/internal/initd"
 )
 
 //go:embed openapi.json
@@ -38,8 +38,7 @@ func (publicAddrError) Error() string { return "denapi listens on 127.0.0.1 only
 
 func main() {
 	addr := flag.String("addr", "127.0.0.1:8793", "loopback listen address")
-	home, _ := os.UserHomeDir()
-	sock := flag.String("sock", filepath.Join(home, ".local", "share", "harness", "den.sock"), "daemon socket")
+	sock := flag.String("sock", initd.DefaultSock(), "daemon socket")
 	flag.Parse()
 	if err := loopback(*addr); err != nil {
 		log.Fatal(err)

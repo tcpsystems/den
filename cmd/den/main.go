@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/tcpsystems/den/internal/initd"
 )
@@ -22,8 +21,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	home, _ := os.UserHomeDir()
-	sock := filepath.Join(home, ".local", "share", "harness", "den.sock")
+	sock := initd.DefaultSock()
 	board, err := initd.Load(repo, sock)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)

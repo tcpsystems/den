@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/tcpsystems/den/internal/initd"
@@ -15,7 +14,7 @@ func TestSessionWritesBoardBeforeStartingProcesses(t *testing.T) {
 	if err := os.Chdir(repo); err != nil {
 		t.Fatal(err)
 	}
-	sock := filepath.Join(home, ".local", "share", "harness", "den.sock")
+	sock := initd.DefaultSock()
 	board, err := initd.Load(repo, sock)
 	if err != nil {
 		t.Fatal(err)
