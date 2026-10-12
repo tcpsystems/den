@@ -1,9 +1,13 @@
 package console
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestSlotsAreOneList(t *testing.T) {
@@ -57,5 +61,27 @@ func TestProjectsStayOutOfSecrets(t *testing.T) {
 func TestAtoi(t *testing.T) {
 	if atoi("12") != 12 || atoi("x") != 0 {
 		t.Fatal("atoi")
+	}
+}
+
+// TestProbeDownDoesNotStall covers a service that accepts the connection
+// and then hangs: probe must report "down" and return at roughly
+// probeTimeout, never near the handler's full sleep.
+func TestProbeDownDoesNotStall(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(3 * time.Second)
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	start := time.Now()
+	status := probe(context.Background(), srv.URL)
+	elapsed := time.Since(start)
+
+	if status != "down" {
+		t.Fatalf("status = %q, want down", status)
+	}
+	if elapsed > probeTimeout+500*time.Millisecond {
+		t.Fatalf("probe took %v, want roughly %v", elapsed, probeTimeout)
 	}
 }

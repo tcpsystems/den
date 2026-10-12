@@ -191,35 +191,47 @@ func readBranches(ctx context.Context, repo string) []Branch {
 	return rows
 }
 
+// probeEntry is one cached probe result. The TTL is per URL, not shared
+// across services, so a fresh check of one service cannot make a stale
+// check of another look current.
+type probeEntry struct {
+	status string
+	at     time.Time
+}
+
 var probeCache = struct {
 	sync.Mutex
-	at     time.Time
-	values map[string]string
-}{values: map[string]string{}}
+	values map[string]probeEntry
+}{values: map[string]probeEntry{}}
 
+// probeTimeout bounds one curl call. A service that accepts the TCP
+// connection and then never answers must still report down within this
+// window, not after it.
+const probeTimeout = 1 * time.Second
+
+// probe reports "up" or "down" for rawURL, caching each result for 5s.
+// The cache mutex is held only for the map read and the map write, never
+// for the curl call itself, so one hung or slow probe cannot delay the
+// cache lookup or update for any other URL.
 func probe(ctx context.Context, rawURL string) string {
 	probeCache.Lock()
-	if time.Since(probeCache.at) < 5*time.Second {
-		if value, ok := probeCache.values[rawURL]; ok {
-			probeCache.Unlock()
-			return value
-		}
-	}
+	entry, ok := probeCache.values[rawURL]
 	probeCache.Unlock()
-	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	if ok && time.Since(entry.at) < 5*time.Second {
+		return entry.status
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "curl", "-fsS", "-o", "/dev/null", "-w", "%{http_code}", rawURL)
 	out, err := cmd.Output()
-	if err != nil {
-		return "down"
-	}
 	status := "down"
 	if err == nil && strings.TrimSpace(string(out)) == "200" {
 		status = "up"
 	}
+
 	probeCache.Lock()
-	probeCache.values[rawURL] = status
-	probeCache.at = time.Now()
+	probeCache.values[rawURL] = probeEntry{status: status, at: time.Now()}
 	probeCache.Unlock()
 	return status
 }
