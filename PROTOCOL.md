@@ -38,6 +38,27 @@ Do not edit `plan.md`. A later sweep reads the landed diffs and reconciles regio
 
 This host cannot let a researcher start its own sessions. The five grunt branches for each researcher are already open. Grunts write their own files. Researchers write the section lead. A later merge reads the branches.
 
+## Cluster fan-out
+
+A cluster task spec is a single plain text spec, not a vendor format.
+
+Four or more free models answer that one spec in parallel over OmniRoute
+(`https://ai.tcp.systems/v1`). Each call is an independent HTTPS request, not
+a subagent.
+
+Each worker's raw output lands in `/tmp/harness-wave/taskN/`, one file per
+worker (`workerM.txt`).
+
+A consensus merge step picks exactly one implementation from the worker
+outputs and applies it to the repo.
+
+Workers never commit. Only the orchestrator reviews, tests, and commits the
+chosen implementation.
+
+A failing model id (4xx, 429, or an empty response) is skipped mid-run and
+replaced from a verified pool of free models, so the fan-out still reaches
+its target worker count.
+
 ## Opens already on the table
 
 - Next fetch: Superpowers keeps steer, ledger, and Rail bodies out, pointer only. Graphify, AgentScope, and Spring let the Rail switch ride with the section.
