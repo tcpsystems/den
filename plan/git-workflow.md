@@ -36,3 +36,14 @@ A finished, checked commit is pushed to the existing GitHub remote at the end of
 4. Trace and reduce `/api/state` latency.
 5. Add the three-width screenshot check.
 6. Add the read-only OmniRoute evidence client.
+
+## 6. Completion Pipeline
+Close out a wave in this order:
+- Cluster lands: worker/consensus results land in a scratch dir.
+- Orchestrator reviews consensus diffs.
+- One conventional commit per task (`feat`/`fix`/`docs`, matching §1 prefixes) on the wave branch.
+- `go test ./...` must pass before anything merges.
+- Fast-forward-only merge of finished branch drafts onto the wave branch.
+- Consolidation pass: dedupe and canonicalize what landed.
+- Write an assessment note to OpenViking memory, key pattern `assessment-wave-YYYYMMDD`.
+- Next project handoff order: radar first, then ideology, skills, fox, foxd, floki.
