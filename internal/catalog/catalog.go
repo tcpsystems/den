@@ -42,6 +42,7 @@ func Builtin() Index {
 		{Kind: KindNiche, ID: "harness-runtime", Title: "Harness runtime", Summary: "denctl, catalog, seats, grants."},
 		{Kind: KindIdentity, ID: "den-1", Title: "Den", Summary: "The seat that uses this harness. Id den-1, name Den, avatar den."},
 		{Kind: KindSkill, ID: "use-harness", Title: "Use harness", Summary: "Route one reference, then one skill body.", Path: "skills/use-harness/SKILL.md"},
+		{Kind: KindSkill, ID: "use-git", Title: "Use git", Summary: "One local commit. Conventional subject. Does not push.", Path: "skills/use-git/SKILL.md"},
 		{Kind: KindProfile, ID: "lead", Title: "Lead", Summary: "den-1, builder, harness-runtime, auto/coding, use-harness, session-ledger."},
 	}}
 }
