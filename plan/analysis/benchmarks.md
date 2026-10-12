@@ -12,4 +12,6 @@ The 70.58 MTEB figure is the unquantized Qwen3-Embedding-8B. The 91.4 LoCoMo fig
 
 ## What the rows train
 
-A pass keeps the description match. A fail drops it. An offline pass may use the 3B file on the GTX 1050 Ti while that card is idle. That pass is not in the live packet.
+A pass keeps the description match. A fail drops it.
+
+An offline label may be written while the GTX 1050 Ti is idle and the embedder is not the display. That label is a file. It is not a model id in the live packet, and it is not a fallback when `127.0.0.1:8091` is down. A down embedder means the seat waits. The live index stays Qwen3-Embedding-8B Q6_K at 4096 dimensions.
