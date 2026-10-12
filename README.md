@@ -1,21 +1,29 @@
-# den
+# Den: The Production Agentic Harness
 
-Local seats for the tcp.systems agentic system. Each seat gets one packet, one skill, and a microVM. They still talk on the mesh.
+Den is the production-grade, token-aware agentic runtime and control plane for local execution, runtime MCP multiplexing, operator TUI observability, and ephemeral permission leasing. It provides isolated workspace sandboxing, strict path-jail boundaries, and multi-model routing via OmniRoute.
 
-This is not the Foxcore control plane. `fox`, `foxd`, and `floki` stay in `foxcore-cloud`. The deprecated base is [`foxcore-cloud/agent-mesh`](https://github.com/foxcore-cloud/agent-mesh) at `c985423`. That line is archived. New work lands on `develop`.
+## Repository Scope & Ecosystem Boundary
 
-`main` on this repo is the archive pointer. Do not add features to it.
+- **`den` (This Repository)**: The local runtime daemon (`denctl`), operator TUI (`dentui`), read/fetch utilities (`denread`, `denfetch`), core process supervisor (`initd`), security guardrails (`path_jail`), and persistent state ledgers.
+- **`tcpsystems/agent-mesh` / Hub (`tcp.systems` org)**: Distributed agent communication mesh, node heartbeat coordination, and A2A sync.
+- **`foxcore-cloud/*`**: Core control plane (`fox`, `foxd`, `floki`), platform services, and infrastructure definitions.
+- **`tcpsystems/radar`**: Pricing, live model indexes, provider rate cards, and telemetry state desks.
 
-Trackers, sources, pricing, and models live in [`tcpsystems/radar`](https://github.com/tcpsystems/radar), moved from `foxcore-cloud/tcp-systems`.
+## Core Architecture & Components
 
-## Read first
+1. **Runtime (`denctl`)**: Manages agent seat lifecycles, execution telemetry, workspace jails, and local SQLite/JSON persistence.
+2. **Operator TUI (`dentui`)**: A high-performance terminal user interface built with Charm (Bubbletea) providing live observability, worker selection, model routing controls, and permission escalation dialogues.
+3. **Ephemeral Permissions**: Time-bounded permission leasing with automatic TTL revocation. Agents start with minimal privileges and must request explicit temporary grants with documented operational justifications.
+4. **Skill & Niche Bundling**: High-frequency core skills are injected directly into active worker contexts; niche or specialized skills are deferred and retrieved via runtime discovery.
+5. **Persistence & Resilience**: All consensus records, analysis summaries, and state trees are stored as immutable flat Markdown and JSON ledgers on disk, ensuring seamless recovery and state reconciliation across OpenViking or embedder rebuilds.
 
-`plan/PLAN.md` is the plan. `DEVELOP.md` is how a section is committed and pushed.
+## Quick Start & Build
 
-## What a seat already has
+```bash
+# Build all den binaries
+go build ./cmd/...
 
-- A direct model id. OmniRoute is a tool, not the default hop.
-- Fast and recent memory on the machine. The OmniRoute host keeps the backup.
-- Embeddings at `127.0.0.1:8091` when the RX 6600 embedder is installed.
-- A smolvm guest on the `harness` network.
-- One route skill, `skills/use-harness`.
+# Run the runtime daemon or TUI control plane
+./cmd/dentui/dentui --help
+```
+
