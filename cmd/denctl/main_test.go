@@ -36,7 +36,7 @@ func TestEventsStreamsState(t *testing.T) {
 	repo := t.TempDir()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/api/events", eventsHandler(repo))
-	srv := httptest.NewServer(mux)
+	srv := httptest.NewServer(lanOnly(mux))
 	defer srv.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

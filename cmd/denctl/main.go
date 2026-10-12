@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net"
 	"net/http"
 	"time"
 
@@ -18,15 +19,19 @@ import (
 var page embed.FS
 
 func main() {
+	addr := flag.String("addr", "127.0.0.1:8793", "web listen address; home LAN and loopback only")
 	sock := flag.String("sock", defaultSock(), "unix socket presented to local clients")
 	repo := flag.String("repo", ".", "git repository to read")
 	flag.Parse()
-	if err := serve(*sock, *repo); err != nil {
+	if err := serve(*addr, *sock, *repo); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func serve(sock, repo string) error {
+func serve(addr, sock, repo string) error {
+	if err := webBind(addr); err != nil {
+		return err
+	}
 	sub, err := fs.Sub(page, "web")
 	if err != nil {
 		return err
@@ -37,8 +42,29 @@ func serve(sock, repo string) error {
 		writeState(w, r, repo)
 	})
 	mux.HandleFunc("/api/events", eventsHandler(repo))
-	log.Printf("denctl sock %s", sock)
-	return listenUnix(sock, mux)
+	web := lanOnly(mux)
+	errc := make(chan error, 2)
+	go func() { errc <- listenUnix(sock, mux) }()
+	go func() { errc <- listenTCP(addr, web) }()
+	log.Printf("denctl sock %s web %s", sock, addr)
+	return <-errc
+}
+
+// webBind refuses a wildcard or public bind. Clients still pass lanOnly,
+// so a home address is accepted and a non-home peer is rejected.
+func webBind(addr string) error {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return err
+	}
+	if host == "" || host == "0.0.0.0" || host == "::" {
+		return errPublic
+	}
+	ip := net.ParseIP(host)
+	if ip == nil || !lanAllowed(ip) {
+		return errPublic
+	}
+	return nil
 }
 
 func eventsHandler(repo string) http.HandlerFunc {
