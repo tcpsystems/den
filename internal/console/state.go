@@ -23,6 +23,7 @@ type State struct {
 	Services map[string]string `json:"services"`
 	Counts   map[string]int    `json:"counts"`
 	Branches []Branch          `json:"branches"`
+	Clusters []Cluster         `json:"clusters"`
 	Slots    []Slot            `json:"slots"`
 	Projects []Project         `json:"projects"`
 }
@@ -125,6 +126,7 @@ func Collect(ctx context.Context, repo string) State {
 			"ahead":    ahead,
 		},
 		Branches: rows,
+		Clusters: Clusters("/tmp/harness-wave"),
 		Slots:    Slots(),
 		Projects: Projects(""),
 	}

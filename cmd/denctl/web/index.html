@@ -23,18 +23,20 @@ li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
 <section><h2>Services</h2><ul id="services"></ul></section>
 <section><h2>Counts</h2><ul id="counts"></ul></section>
 <section><h2>Branches</h2><ul id="branches"></ul></section>
+<section><h2>Clusters</h2><ul id="clusters"></ul></section>
 <section><h2>Projects</h2><ul id="projects"></ul></section>
 </main>
 <script>
-const lists = ["services", "counts", "branches", "projects"].map(id => document.getElementById(id));
+const lists = ["services", "counts", "branches", "clusters", "projects"].map(id => document.getElementById(id));
 function row(a, b, cls) { const li = document.createElement("li"); li.innerHTML = `<span>${a}</span><span class="${cls || ""}">${b}</span>`; return li; }
 function paint(state) {
   document.getElementById("title").textContent = state.repo || "den";
-  const [services, counts, branches, projects] = lists;
+  const [services, counts, branches, clusters, projects] = lists;
   for (const list of lists) list.replaceChildren();
   for (const [name, status] of Object.entries(state.services || {})) services.append(row(name, status, status === "up" ? "ok" : "bad"));
   for (const [name, value] of Object.entries(state.counts || {})) counts.append(row(name, value));
   for (const branch of state.branches || []) branches.append(row(branch.name, `${branch.ahead} ahead`));
+  for (const cluster of state.clusters || []) clusters.append(row(cluster.task, cluster.consensus ? `✓ ${cluster.note}` : `${cluster.workers} workers`, cluster.consensus ? "ok" : ""));
   for (const project of state.projects || []) projects.append(row(project.name, project.status));
 }
 const events = new EventSource("/api/events");
