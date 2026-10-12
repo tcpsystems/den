@@ -43,6 +43,17 @@ func path(repo string) string {
 	return filepath.Join(repo, ".den", "init.json")
 }
 
+// DefaultSock is the socket path every den binary falls back to when no
+// explicit -sock flag is given: $HOME/.local/share/harness/den.sock, or
+// /tmp/den.sock if the home directory cannot be read.
+func DefaultSock() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "/tmp/den.sock"
+	}
+	return filepath.Join(home, ".local", "share", "harness", "den.sock")
+}
+
 // Load reads the board. A missing file returns Default.
 func Load(repo, sock string) (Board, error) {
 	b, err := os.ReadFile(path(repo))

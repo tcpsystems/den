@@ -6,17 +6,15 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/tcpsystems/den/internal/initd"
 )
 
 // defaultSock is the socket the daemon presents. TUI and other local
 // clients dial this. The browser cannot dial a Unix socket, so the same
 // handlers are also served on 127.0.0.1 for the web UI only.
 func defaultSock() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "/tmp/den.sock"
-	}
-	return filepath.Join(home, ".local", "share", "harness", "den.sock")
+	return initd.DefaultSock()
 }
 
 func listenUnix(path string, h http.Handler) error {
