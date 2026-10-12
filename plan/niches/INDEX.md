@@ -4,6 +4,8 @@ Each row is one section an agent may fill. One agent, one niche file, one skill.
 
 Fox, foxd, and floki stay the company product. den is the harness. radar is the list of trackers, sources, prices, and models. tcp.systems later runs both, and uses them to operate Foxcore. den does not become the control plane.
 
+Foxcore.cloud specializes in game hosting. NoLag Host is a competitor and research source. Its prices and claims need official evidence before acceptance.
+
 ## How a niche is filled
 
 1. Open the sources. One claim, one URL.
@@ -28,6 +30,30 @@ Fox, foxd, and floki stay the company product. den is the harness. radar is the 
 | hashicorp | Nomad, Consul, Vault as later schedulers, not the mesh | `sections/workers` |
 | k8s | Kubernetes as a later guest runtime, not the seat bus | `sections/workers` |
 | colo | Racks, power, cross-connect, remote hands | `plan/niches/market.md` |
+| supply | Image pins, signatures, dependency review | `sections/security` |
+| secrets | Credential storage and grant names, never values | `sections/security` |
+| backup | Named restore points before destructive changes | `sections/store` |
+| identity | Brand and service identity, separate from seat identity | `sections/design` |
+| observe | Logs, metrics, traces, and latency evidence | `sections/store` |
+| product | Interface structure, accessibility, and responsive states | `sections/design` |
+| panels | Pterodactyl, Pelican, Wings, VirtFusion, Virtualizor | `sections/workers` |
+| games | Game-server offer and configuration comparison | `plan/niches/market.md` |
+| config | Den checks and applies one configuration change | `sections/workers` |
+| edge | Cloudflare, Spectrum, Fly.io, Railway, Koyeb | `references/tools.md` |
+| queue | NATS and message delivery boundaries | `sections/workers` |
+| crypto | Key management and secure-by-design review | `sections/security` |
+| linux | Permissions, firewall, eBPF, XDP, L7 filtering | `sections/security` |
+| mods | Game, plugin, and mod indexes | `sections/catalog` |
+| api | OpenAPI and public response contracts | `references/tools.md` |
+| guides | Public installation guides, rewritten and sourced | `plan/niches/market.md` |
+| knowledge | Local knowledge base and archive references | `sections/store` |
+| runtime | Kubernetes, k3s, Nomad, KVM, Firecracker, smolvm | `sections/workers` |
+| mail | Foxcore email, lists, and support workflows | `sections/design` |
+| business | Accounts, invoicing, and operations | `plan/niches/market.md` |
+| dns | DNS, subdomains, and short domains | `references/tools.md` |
+| clones | Public-data products such as network and media indexes | `plan/niches/market.md` |
+
+Offensive testing is parked. A local defensive check may cite it, but no offensive niche or skill is loaded.
 
 ## Craft
 

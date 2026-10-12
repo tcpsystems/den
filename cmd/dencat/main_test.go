@@ -11,8 +11,12 @@ import (
 )
 
 func TestCatalogPrintsLead(t *testing.T) {
+	root := t.TempDir()
 	idx := catalog.Builtin()
-	if err := catalog.LoadPlugins(&idx, filepath.Join(t.TempDir(), "plugins")); err != nil {
+	if err := catalog.LoadSkills(&idx, root); err != nil {
+		t.Fatal(err)
+	}
+	if err := catalog.LoadPlugins(&idx, filepath.Join(root, "plugins")); err != nil {
 		t.Fatal(err)
 	}
 	b, err := json.Marshal(idx)

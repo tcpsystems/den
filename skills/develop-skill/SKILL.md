@@ -14,22 +14,17 @@ Run this loop once. Then stop. A second pass is a new packet.
 5. Reiterate only when the check fails. Fix that skill. Do not start a second topic.
 6. Solidify. The new skill has a description, one path, and a check. Then it is done.
 
-## Already installed
+## Already in this repo
 
-Use these. Do not copy their text into den.
+Use `skills/`. Do not copy their text into a packet. A skill that is not under `skills/` is outside the harness. The packet names that path. This repo does not store an agent home.
 
 | Task | Path |
 | --- | --- |
-| Cloudflare Workers, Wrangler, Durable Objects, D1-adjacent docs | `~/.grok/skills/cloudflare`, `workers-best-practices`, `wrangler`, `durable-objects` |
-| Web performance | `~/.agents/skills/web-perf` |
-| Vercel deploy, React composition, cost | `~/.agents/skills/deploy-to-vercel`, `vercel-composition-patterns`, `vercel-optimize`, `vercel-react-best-practices` |
-| Page and prose review | `~/.agents/skills/web-design-guidelines`, `writing-guidelines` |
-| Fetch a public page | `~/.agents/skills/use-tinyfish` |
 | This harness | `skills/use-harness`, `skills/select-skill`, `skills/onboard` |
 
 GitHub has no skill directory here. Use the `gh` command. Do not invent a token file.
 
-MCP discovery is `meshctl suite check` and the `mcp_servers` entries in `~/.grok/config.toml`. Report the server name and whether it is enabled. Do not print a bearer token.
+MCP discovery reports the server name and whether it is enabled. The operator config that lists servers is outside this repo. Do not print a bearer token.
 
 ## Check
 

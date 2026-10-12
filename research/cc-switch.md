@@ -6,7 +6,7 @@ Pages opened: the repository README, `CONTRIBUTING.md`, `session-manager.md`, an
 
 ## What it is
 
-CC Switch is a local desktop manager (Tauri, Rust, React, SQLite) for several coding tools. Its job is to keep one store of providers, MCP servers, prompts, skills, and projects, then write a narrow projection into each tool's own config. The database `~/.cc-switch/cc-switch.db` is the single source of truth. Live files such as `~/.claude/settings.json`, `~/.codex/config.toml`, `~/.gemini/.env`, and `~/.grok/config.toml` are projections. Device files stay on this computer.
+CC Switch is a local desktop manager (Tauri, Rust, React, SQLite) for several coding tools. Its job is to keep one store of providers, MCP servers, prompts, skills, and projects, then write a narrow projection into each tool's own config. The database on the computer is the single source of truth. Each tool's live config is a projection. Device files stay on that computer.
 
 `CONTRIBUTING.md` draws three paths out of the backend: the database, atomic live-config writers (temp file plus rename), and a separate local-routing process. Routing is not the same path as writing a live config. The mesh analog is the database plus the live writer plus the fetch of what was stored. The routing process looks up a target and can move to another provider. That part chooses a model. It is not the bus.
 

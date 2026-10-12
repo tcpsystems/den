@@ -1,6 +1,6 @@
 # Architecture
 
-The base is `plan/BASE.md`. This page is detail under it. Extend `BASE.md` only by a section branch and a check.
+The base is `plan/BASE.md`. Names are `plan/names.md`. The foundation block is `plan/foundation.md`. This page is detail under the base. Extend `BASE.md` only by a section branch and a check. The second analysis starts from `PROMPT.md` when the human runs it.
 
 den is a seat harness. tcp.systems is the system it folds into. Foxcore is the company that system operates. The three do not share a brain.
 

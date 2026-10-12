@@ -1,92 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>den controller</title>
+<title>den</title>
 <style>
-  :root { color-scheme: dark; --bg:#14120f; --panel:#1c1915; --ink:#f3efe6; --muted:#a39888; --line:#3a342c; --accent:#f76707; --up:#9dbe7c; --down:#e07a5f; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 Palatino, Georgia, serif; }
-  header, main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; }
-  header { padding: 28px 0 8px; }
-  h1 { font-size: 28px; margin: 0; letter-spacing: -0.03em; }
-  h1 span, h2 span { color: var(--accent); }
-  p, th { color: var(--muted); }
-  h2 { font-size: 18px; margin: 22px 0 8px; }
-  .grid, .slots { display: grid; gap: 10px; }
-  .grid { grid-template-columns: repeat(4, 1fr); }
-  .slots { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
-  .card b { display: block; font-size: 26px; }
-  .card span, .slot small { color: var(--muted); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
-  .slot { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
-  .this { border-color: var(--accent); }
-  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); }
-  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 18px; }
-  .pill { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
-  .up { color: var(--up); } .down { color: var(--down); }
-  @media (max-width: 800px) { .grid { grid-template-columns: 1fr 1fr; } table { display: block; overflow-x: auto; } }
+:root { color-scheme: dark; font: 15px/1.4 sans-serif; background: #101114; color: #e8e8e8; }
+body { margin: 0; padding: 24px; }
+main { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+section { border: 1px solid #30343b; border-radius: 8px; padding: 16px; min-width: 0; }
+h1, h2 { margin: 0 0 12px; font-size: 1rem; }
+ul { margin: 0; padding: 0; list-style: none; }
+li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.ok { color: #8fd18f; } .bad { color: #e58b8b; } .muted { color: #9aa1ab; }
+@media (max-width: 800px) { body { padding: 12px; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>den <span>controller</span></h1>
-  <p>A frame is sent only when state changes. Loopback. WebSocket, QUIC, and Workers are slots, not this listen address. This page does not start a seat.</p>
-</header>
+<h1 id="title">den</h1>
+<p id="live" class="muted">connecting</p>
 <main>
-  <section class="grid" id="counts"></section>
-  <section class="pills" id="services"></section>
-  <h2>Slots <span>for later</span></h2>
-  <section class="slots" id="slots"></section>
-  <h2>Nest</h2>
-  <table><thead><tr><th>Org</th><th>Project</th><th>Role</th><th>Status</th></tr></thead><tbody id="projects"></tbody></table>
-  <h2>Branches</h2>
-  <table><thead><tr><th>Branch</th><th>Ahead</th><th>Subject</th></tr></thead><tbody id="rows"></tbody></table>
+<section><h2>Services</h2><ul id="services"></ul></section>
+<section><h2>Counts</h2><ul id="counts"></ul></section>
+<section><h2>Branches</h2><ul id="branches"></ul></section>
+<section><h2>Projects</h2><ul id="projects"></ul></section>
 </main>
 <script>
-function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
-function paint(data) {
-  const counts = document.querySelector("#counts");
-  counts.replaceChildren();
-  for (const [key, value] of Object.entries(data.counts)) {
-    const card = el("article", "card");
-    card.append(el("span", "", key), el("b", "", String(value)));
-    counts.append(card);
-  }
-  const services = document.querySelector("#services");
-  services.replaceChildren();
-  for (const [name, state] of Object.entries(data.services)) {
-    services.append(el("span", "pill " + (state === "up" ? "up" : "down"), name + " " + state));
-  }
-  const slots = document.querySelector("#slots");
-  slots.replaceChildren();
-  for (const slot of data.slots) {
-    const card = el("article", "slot" + (slot.status === "this" ? " this" : ""));
-    card.append(el("strong", "", slot.id), el("small", "", slot.status), el("div", "", slot.note));
-    slots.append(card);
-  }
-  const projects = document.querySelector("#projects");
-  projects.replaceChildren();
-  for (const project of data.projects || []) {
-    const tr = document.createElement("tr");
-    tr.append(el("td", "", project.org), el("td", "", project.name), el("td", "", project.role), el("td", project.status === "present" ? "up" : "down", project.status));
-    projects.append(tr);
-  }
-  const rows = document.querySelector("#rows");
-  rows.replaceChildren();
-  for (const row of data.branches) {
-    const tr = document.createElement("tr");
-    tr.append(el("td", "", row.name), el("td", "", row.sha + " +" + row.ahead), el("td", "", row.subject));
-    rows.append(tr);
-  }
+const lists = ["services", "counts", "branches", "projects"].map(id => document.getElementById(id));
+function row(a, b, cls) { const li = document.createElement("li"); li.innerHTML = `<span>${a}</span><span class="${cls || ""}">${b}</span>`; return li; }
+function paint(state) {
+  document.getElementById("title").textContent = state.repo || "den";
+  const [services, counts, branches, projects] = lists;
+  for (const list of lists) list.replaceChildren();
+  for (const [name, status] of Object.entries(state.services || {})) services.append(row(name, status, status === "up" ? "ok" : "bad"));
+  for (const [name, value] of Object.entries(state.counts || {})) counts.append(row(name, value));
+  for (const branch of state.branches || []) branches.append(row(branch.name, `${branch.ahead} ahead`));
+  for (const project of state.projects || []) projects.append(row(project.name, project.status));
 }
-const stream = new EventSource("/api/events");
-stream.addEventListener("state", (ev) => paint(JSON.parse(ev.data)));
-stream.onerror = () => {
-  document.title = "den controller (reconnecting)";
-};
+const events = new EventSource("/api/events");
+events.addEventListener("state", event => { document.getElementById("live").textContent = "live"; paint(JSON.parse(event.data)); });
+events.onerror = () => { document.getElementById("live").textContent = "reconnecting"; };
 </script>
 </body>
 </html>

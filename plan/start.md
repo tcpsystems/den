@@ -19,7 +19,7 @@ A check is "the file or service exists." The value inside is not read into the p
 | GitHub | `gh` on `PATH` and `~/.config/gh/hosts.yml` | present |
 | Hetzner | `hcloud` and `~/.config/hcloud/cli.toml`, token file `~/.config/mcphub/secrets.env` | present |
 | OmniRoute | `~/.config/omniroute/api.key` | present |
-| Cloudflare | MCP entry in `~/.grok/config.toml` and `~/.cursor/mcp.json`. OAuth on first use. No API token file is assumed | configured, not a key file |
+| Cloudflare | An MCP server named in the operator config. That file is outside this repo. OAuth on first use. No API token file is assumed | configured, not a key file |
 | Tailscale | `tailscale` on `PATH`, status succeeds | present |
 | Headscale | `headscale` active on `tcp` | present on that host, not a local token file |
 | Notion | a token file the user names | missing until named |

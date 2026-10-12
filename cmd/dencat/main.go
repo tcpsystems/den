@@ -20,6 +20,10 @@ func main() {
 		return
 	}
 	idx := catalog.Builtin()
+	if err := catalog.LoadSkills(&idx, *repo); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	if err := catalog.LoadPlugins(&idx, *repo+"/plugins"); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

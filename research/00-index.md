@@ -1,6 +1,8 @@
 # Niche index
 
-These notes expand `/home/kivox/.grok/sessions/%2Fhome%2Fkivox/01a12bd0-a140-7f32-89ca-ee0963199ba8/plan.md`. They are not a second plan. A line moves into the plan only when two finished notes state it and no lead cuts it.
+Looked-over project cards live in `library/`. Rules are `library/RULES.md`.
+
+These notes expand `plan.md` in this repository. They are not a second plan. A line moves into the plan only when two finished notes state it and no lead cuts it.
 
 Spectator seed, 2026-10-11. Deeper files are being written beside this index.
 

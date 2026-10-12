@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
-	"net"
 	"net/http"
 	"time"
 
@@ -19,23 +18,15 @@ import (
 var page embed.FS
 
 func main() {
-	addr := flag.String("addr", "127.0.0.1:8793", "loopback listen address for the browser")
 	sock := flag.String("sock", defaultSock(), "unix socket presented to local clients")
 	repo := flag.String("repo", ".", "git repository to read")
 	flag.Parse()
-	if err := serve(*addr, *sock, *repo); err != nil {
+	if err := serve(*sock, *repo); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func serve(addr, sock, repo string) error {
-	host, _, err := net.SplitHostPort(addr)
-	if err != nil {
-		return err
-	}
-	if host != "127.0.0.1" && host != "::1" {
-		return errPublic
-	}
+func serve(sock, repo string) error {
 	sub, err := fs.Sub(page, "web")
 	if err != nil {
 		return err
@@ -45,7 +36,13 @@ func serve(addr, sock, repo string) error {
 	mux.HandleFunc("/api/state", func(w http.ResponseWriter, r *http.Request) {
 		writeState(w, r, repo)
 	})
-	mux.HandleFunc("/api/events", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/events", eventsHandler(repo))
+	log.Printf("denctl sock %s", sock)
+	return listenUnix(sock, mux)
+}
+
+func eventsHandler(repo string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		flusher, ok := w.(http.Flusher)
 		if !ok {
 			http.Error(w, "stream unsupported", http.StatusInternalServerError)
@@ -96,19 +93,7 @@ func serve(addr, sock, repo string) error {
 				}
 			}
 		}
-	})
-	errc := make(chan error, 2)
-	go func() { errc <- listenUnix(sock, mux) }()
-	go func() {
-		ln, err := net.Listen("tcp", addr)
-		if err != nil {
-			errc <- err
-			return
-		}
-		errc <- (&http.Server{Handler: mux, ReadHeaderTimeout: 5 * time.Second}).Serve(ln)
-	}()
-	log.Printf("denctl sock %s web %s", sock, addr)
-	return <-errc
+	}
 }
 
 func writeState(w http.ResponseWriter, r *http.Request, repo string) {

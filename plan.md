@@ -75,7 +75,7 @@ They research, debate, and analyse. Each has its own department, so it cannot ta
 | noor, sable, ivo, rhee | Turn three findings into the next section |
 | bram, cass, dell, echo, jules, kit, lane, moss, ren, sol, tess, uma, ash, bay, cole, drew, indra, joss, keir, lux, maren, nico, opal, pax | One assigned section each. Read only |
 
-Read-only roots: `~/Documents/foxcore-repo`, `~/Projects/tcp-systems`, `~/Projects/deer-flow/skills/custom`, `~/.agents/skills`, `~/.grok/bundled/skills`, `~/.grok/sessions`. Xenode is not on this machine.
+Read-only roots are the checkouts named in `plan/nest.md`. Xenode is not on this machine.
 
 ## 6. Rails
 
@@ -116,7 +116,7 @@ These lines are from finished seats. They are not a build.
 
 **memory-docs.** One store appends a section, fetches the latest, and refuses a second store. Embeddings stay on the local embedder. A language pass that leaves this store for a combo is refused.
 
-**skill-docs.** Skills stay discoverable by catalog frontmatter. One body loads only when the description matches. The count they reported: 35 under DeerFlow custom, 10 under `~/.agents/skills`, 22 under bundled Grok skills.
+**skill-docs.** Skills stay discoverable by catalog frontmatter. One body loads only when the description matches. Harness skills live in `skills/`.
 
 **tool-docs.** Three tool steps, each with name, inputs, outputs, params, and next. The result attaches to the packet. It does not pick the next seat. CLI is argv only, no shell, no delete. MCP discovers, then calls.
 
@@ -182,7 +182,7 @@ Source pack the run must read before it writes:
 - Vendor skills, guides, guards, and harnesses: Vercel, Anthropic, Google, OpenAI, DeepSeek, Qwen, Kimi, Moonshot, Reasonix, Cursor, Grok, xAI, Cloudflare.
 - Already on disk: `/tmp/harness-ten/*.md`. AirLLM is an optional later disk-stream inference slot, not the loop.
 
-Workflow to save, and not launch until the owner says run: `~/.grok/workflows/harness-plan-expand.rhai`.
+The notes from that run are in `research/`. The runner that produced them stays outside this repo.
 
 Phases: inventory this file, research the source pack, verify each proposed line against this file, append only **Suggestion** lines. Output is a scratch expansion draft plus a union summary. No software.
 

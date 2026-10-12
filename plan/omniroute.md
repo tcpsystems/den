@@ -6,6 +6,7 @@ OmniRoute is a tool the packet names. It is not the seat's model hop. A provisio
 | --- | --- | --- | --- |
 | Direct model id | The packet names one model | A combo would add a hop for a single call | `prompts/seat.md` |
 | Combo `harness-winner` | The packet says the call may move among the scored models | The seat has a direct id, or latency matters more than a retry | `plan/omniroute.md` |
+| Combo `cost-clock` | A cheap call may follow the DeepSeek peak clock | The seat named a direct model id | `plan/omniroute.md` |
 | Batch | Many completions are already written, and none need a tool in the middle | The seat is in a tool loop | `skills/use-harness/references/tools.md` |
 | A2A | The tool is a remote agent card at `https://ai.tcp.systems/api/a2a` | The other party is a den seat. Seats talk on the mesh | `skills/use-harness/references/tools.md` |
 | MCP | The step needs a gateway tool, and `meshctl suite check` shows it | A local CLI already does the step | `skills/use-harness/references/tools.md` |

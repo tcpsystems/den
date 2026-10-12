@@ -23,3 +23,16 @@ Releases and tags follow Semantic Versioning (`MAJOR.MINOR.PATCH`):
 - **`main` / `develop`**: Protected branches. Direct commits to `main` are strictly prohibited.
 - **Feature/Wave Branches**: Work must be performed in isolated branches (e.g. `wave/YYYYMMDD-<feature>`) or git worktrees (`~/Projects/harness-plan-wt/`).
 - **Atomic Commits**: Each commit must represent a single, verifiable logical unit of change accompanied by passing test output.
+
+## 4. Backup
+
+A finished, checked commit is pushed to the existing GitHub remote at the end of its wave. Secrets, credentials, caches, and unaccepted research are not committed. A conflict returns to the owning worker. The orchestrator does not rewrite the branch.
+
+## 5. Implementation order
+
+1. Consolidate orchestrator and commit checking.
+2. Index every skill and verify its grant.
+3. Fix memory identity and retention.
+4. Trace and reduce `/api/state` latency.
+5. Add the three-width screenshot check.
+6. Add the read-only OmniRoute evidence client.
