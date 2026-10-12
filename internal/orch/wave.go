@@ -34,6 +34,7 @@ func Open(w Wave) (Wave, error) {
 			return Wave{}, fmt.Errorf("seat %d needs id, role, and owns", i)
 		}
 		dir := filepath.Join(w.Worktrees, w.ID+"-"+s.ID)
+		seatBranch := seatBranchName(w.Branch, s.ID)
 		if _, err := os.Stat(filepath.Join(dir, ".git")); err == nil {
 			s.Status = "ready"
 			h, herr := head(dir)
@@ -43,7 +44,8 @@ func Open(w Wave) (Wave, error) {
 			s.Head = h
 			continue
 		}
-		if _, err := git(w.Repo, "worktree", "add", "-B", w.Branch, dir, w.Branch); err != nil {
+		// One branch per seat. Git forbids two worktrees on the same branch.
+		if _, err := git(w.Repo, "worktree", "add", "-B", seatBranch, dir, w.Branch); err != nil {
 			return Wave{}, fmt.Errorf("seat %s: %w", s.ID, err)
 		}
 		s.Status = "ready"
@@ -127,12 +129,13 @@ func Take(repo, waveID, seatID string, checks []Check) (Wave, error) {
 	if len(owned) > 0 || len(foreign) > 0 {
 		return Wave{}, fmt.Errorf("seat %s still has uncommitted changes", s.ID)
 	}
+	seatBranch := seatBranchName(w.Branch, s.ID)
 	br, err := currentBranch(dir)
 	if err != nil {
 		return Wave{}, err
 	}
-	if br != w.Branch {
-		return Wave{}, fmt.Errorf("seat %s is on %s, wave is %s", s.ID, br, w.Branch)
+	if br != seatBranch && br != w.Branch {
+		return Wave{}, fmt.Errorf("seat %s is on %s, want %s", s.ID, br, seatBranch)
 	}
 	for _, c := range checks {
 		cmd := exec.Command(c.Argv[0], c.Argv[1:]...)
@@ -158,16 +161,14 @@ func Take(repo, waveID, seatID string, checks []Check) (Wave, error) {
 	if err != nil {
 		return Wave{}, err
 	}
-	mainHead, err := git(repo, "rev-parse", "HEAD")
-	if err != nil {
-		return Wave{}, err
-	}
-	if seatHead != mainHead {
-		if _, err := git(repo, "merge", "--ff-only", seatHead); err != nil {
+	// Merge the seat branch onto the shared wave branch. Prefer ff; fall back to merge commit.
+	if _, err := git(repo, "merge", "--ff-only", seatHead); err != nil {
+		msg := fmt.Sprintf("orch: take seat %s", s.ID)
+		if _, merr := git(repo, "merge", "--no-ff", "-m", msg, seatHead); merr != nil {
 			s.Status = "feedback"
-			s.Note = err.Error()
+			s.Note = merr.Error()
 			_ = Save(w)
-			return w, err
+			return w, merr
 		}
 	}
 	h, err := head(repo)

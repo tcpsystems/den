@@ -31,6 +31,11 @@ func git(dir string, args ...string) (string, error) {
 	return strings.TrimSpace(out.String()), nil
 }
 
+// seatBranchName is flat. Git refuses refs/heads/wave/x/seat when refs/heads/wave/x exists.
+func seatBranchName(waveBranch, seatID string) string {
+	return waveBranch + "--" + seatID
+}
+
 func head(dir string) (string, error) {
 	return git(dir, "rev-parse", "--short", "HEAD")
 }
