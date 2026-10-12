@@ -10,20 +10,29 @@ func TestBuiltinKinds(t *testing.T) {
 	if len(idx.ByKind(KindTool)) < 3 {
 		t.Fatal("tools")
 	}
+	if len(idx.ByKind(KindIdentity)) != 1 || len(idx.ByKind(KindProfile)) != 1 {
+		t.Fatal("self-use agent missing")
+	}
+}
+
+func TestLeadBindsWithoutRequiredMCP(t *testing.T) {
+	if err := Bind(Builtin(), Lead()); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestBindRequiresCatalog(t *testing.T) {
 	idx := Builtin()
-	idx.Add(Entry{Kind: KindIdentity, ID: "den-1", Title: "Den", Summary: "Local operator seat."})
-	idx.Add(Entry{Kind: KindSkill, ID: "use-harness", Title: "Use harness", Summary: "Route one reference.", Path: "skills/use-harness/SKILL.md"})
-	p := Profile{
-		ID: "lead", Identity: "den-1", Role: "builder", Niche: "harness-runtime",
-		Model: "auto/coding", Skills: []string{"use-harness"}, MCP: []string{"omniroute"},
-		Memory: "session-ledger",
-	}
+	p := Lead()
+	p.MCP = []string{"omniroute"}
 	if err := Bind(idx, p); err != nil {
 		t.Fatal(err)
 	}
+	p.Identity = "missing"
+	if err := Bind(idx, p); err == nil {
+		t.Fatal("want missing identity")
+	}
+	p = Lead()
 	p.Skills = []string{"missing"}
 	if err := Bind(idx, p); err == nil {
 		t.Fatal("want missing skill")

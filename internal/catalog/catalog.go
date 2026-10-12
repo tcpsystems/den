@@ -40,7 +40,20 @@ func Builtin() Index {
 		{Kind: KindModel, ID: "auto/coding:cheap", Title: "Cheap coding route", Summary: "Titles, labels, and checks."},
 		{Kind: KindMemory, ID: "session-ledger", Title: "Session ledger", Summary: "Flat markdown and json under the repo. Survives an embedder rebuild."},
 		{Kind: KindNiche, ID: "harness-runtime", Title: "Harness runtime", Summary: "denctl, catalog, seats, grants."},
+		{Kind: KindIdentity, ID: "den-1", Title: "Den", Summary: "The seat that uses this harness. Id den-1, name Den, avatar den."},
+		{Kind: KindSkill, ID: "use-harness", Title: "Use harness", Summary: "Route one reference, then one skill body.", Path: "skills/use-harness/SKILL.md"},
+		{Kind: KindProfile, ID: "lead", Title: "Lead", Summary: "den-1, builder, harness-runtime, auto/coding, use-harness, session-ledger."},
 	}}
+}
+
+// Lead is the profile a session binds so this harness can staff itself.
+// MCP stays empty. A grant names a server later. None is required.
+func Lead() Profile {
+	return Profile{
+		ID: "lead", Identity: "den-1", Role: "builder", Niche: "harness-runtime",
+		Model: "auto/coding", Skills: []string{"use-harness"}, Memory: "session-ledger",
+		Avatar: "den",
+	}
 }
 
 // Load reads index.json. A missing file returns Builtin.
@@ -135,6 +148,7 @@ func Bind(idx Index, p Profile) error {
 		k  Kind
 		id string
 	}{
+		{KindIdentity, p.Identity},
 		{KindRole, p.Role},
 		{KindNiche, p.Niche},
 		{KindModel, p.Model},
