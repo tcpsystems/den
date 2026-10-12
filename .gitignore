@@ -4,3 +4,7 @@
 secrets/
 __pycache__/
 *.pyc
+.den/
+/bin/
+*.test
+
