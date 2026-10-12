@@ -32,6 +32,10 @@ These names are fixed. A new idea gets a new name. It does not reuse one of thes
 
 `mcp/catalog.json` lists many providers. None is required. SearXNG stays the local search engine. `denfetch` stays as it is until a later expansion. `denmcp spawn` starts the granted containers in parallel. Adding a provider is a new catalog row, not a change of the default.
 
+## Release
+
+`VERSION` and `plan/RELEASE.md` name what the binaries do. `plan/GOALS.md` names what is still unwired. A goal moves only when a test or a command shows it.
+
 ## Extending
 
 Add `plugins/<id>/plugin.json` with new skill, tool, mcp, or niche rows. Do not add a fifth role until the four roles cannot say the job. Do not put Foxcore repos in this catalog.
