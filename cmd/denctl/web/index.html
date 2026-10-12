@@ -10,6 +10,9 @@ body { margin: 0; padding: 24px; }
 main { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
 section { border: 1px solid #30343b; border-radius: 8px; padding: 16px; min-width: 0; }
 h1, h2 { margin: 0 0 12px; font-size: 1rem; }
+input[type="text"] { background: #1a1e24; border: 1px solid #30343b; color: #e8e8e8; padding: 4px 8px; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 0.9em; margin-bottom: 8px; }
+button { background: #30343b; border: 1px solid #30343b; color: #e8e8e8; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em; }
+button:hover { background: #3e444d; }
 ul { margin: 0; padding: 0; list-style: none; }
 li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
 .ok { color: #8fd18f; } .bad { color: #e58b8b; } .muted { color: #9aa1ab; }
@@ -22,26 +25,105 @@ li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; }
 <main>
 <section><h2>Services</h2><ul id="services"></ul></section>
 <section><h2>Counts</h2><ul id="counts"></ul></section>
-<section><h2>Branches</h2><ul id="branches"></ul></section>
-<section><h2>Clusters</h2><ul id="clusters"></ul></section>
+<section><h2>Branches</h2><input type="text" id="filter-branches" placeholder="Filter branches..."><ul id="branches"></ul></section>
+<section><h2>Clusters</h2><input type="text" id="filter-clusters" placeholder="Filter clusters..."><ul id="clusters"></ul></section>
 <section><h2>Projects</h2><ul id="projects"></ul></section>
+<section><h2>Notes</h2><input type="text" id="note-input" placeholder="Add a note..."><button id="note-btn">Add</button><ul id="notes"></ul></section>
 </main>
 <script>
 const lists = ["services", "counts", "branches", "clusters", "projects"].map(id => document.getElementById(id));
+const noteList = document.getElementById("notes");
+const noteInput = document.getElementById("note-input");
+const noteBtn = document.getElementById("note-btn");
+const filterBranches = document.getElementById("filter-branches");
+const filterClusters = document.getElementById("filter-clusters");
+
 function row(a, b, cls) { const li = document.createElement("li"); li.innerHTML = `<span>${a}</span><span class="${cls || ""}">${b}</span>`; return li; }
+
+let lastState = null;
+let lastUpdate = 0;
+
+// clustersByWorkersDesc keeps consensus clusters in the list; it only orders by worker count.
+function clustersByWorkersDesc(list) {
+  return [...(list || [])].sort((a, b) => (b.workers || 0) - (a.workers || 0));
+}
+
+function renderBranches(term) {
+  const list = document.getElementById("branches");
+  list.replaceChildren();
+  for (const branch of (lastState && lastState.branches) || []) {
+    if (!term || branch.name.toLowerCase().includes(term)) {
+      list.append(row(branch.name, `${branch.ahead} ahead`));
+    }
+  }
+}
+
+function renderClusters(term) {
+  const list = document.getElementById("clusters");
+  list.replaceChildren();
+  for (const cluster of clustersByWorkersDesc((lastState && lastState.clusters) || [])) {
+    if (!term || cluster.task.toLowerCase().includes(term)) {
+      list.append(row(cluster.task, cluster.consensus ? `✓ ${cluster.note}` : `${cluster.workers} workers`, cluster.consensus ? "ok" : ""));
+    }
+  }
+}
+
 function paint(state) {
+  lastState = state;
+  lastUpdate = Date.now();
   document.getElementById("title").textContent = state.repo || "den";
   const [services, counts, branches, clusters, projects] = lists;
   for (const list of lists) list.replaceChildren();
   for (const [name, status] of Object.entries(state.services || {})) services.append(row(name, status, status === "up" ? "ok" : "bad"));
   for (const [name, value] of Object.entries(state.counts || {})) counts.append(row(name, value));
-  for (const branch of state.branches || []) branches.append(row(branch.name, `${branch.ahead} ahead`));
-  for (const cluster of state.clusters || []) clusters.append(row(cluster.task, cluster.consensus ? `✓ ${cluster.note}` : `${cluster.workers} workers`, cluster.consensus ? "ok" : ""));
+  renderBranches(filterBranches.value.trim().toLowerCase());
+  renderClusters(filterClusters.value.trim().toLowerCase());
   for (const project of state.projects || []) projects.append(row(project.name, project.status));
 }
+
+function renderNotes(notes) {
+  noteList.replaceChildren();
+  if (!Array.isArray(notes)) return;
+  for (const note of notes) {
+    const text = note.text || note.Text || "";
+    const li = document.createElement("li");
+    li.innerHTML = `<span>${text}</span>`;
+    noteList.appendChild(li);
+  }
+}
+
+function fetchNotes() {
+  fetch("/api/notes")
+    .then(r => r.json())
+    .then(renderNotes)
+    .catch(() => {});
+}
+
+function addNote() {
+  const text = noteInput.value.trim();
+  if (!text) return;
+  fetch("/api/steer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "note", text: text })
+  })
+  .then(() => {
+    noteInput.value = "";
+    fetchNotes();
+  })
+  .catch(() => {});
+}
+
+noteBtn.addEventListener("click", addNote);
+noteInput.addEventListener("keydown", e => { if (e.key === "Enter") addNote(); });
+
+filterBranches.addEventListener("input", () => renderBranches(filterBranches.value.trim().toLowerCase()));
+filterClusters.addEventListener("input", () => renderClusters(filterClusters.value.trim().toLowerCase()));
+
 const events = new EventSource("/api/events");
 let sseOk = false;
 let pollTimer = null;
+
 function loadOnce() {
   fetch("/api/state").then(r => r.json()).then(state => {
     if (sseOk) return;
@@ -49,18 +131,31 @@ function loadOnce() {
     document.getElementById("live").textContent = "live (poll)";
   }).catch(() => {});
 }
+
 function startPoll() {
   if (pollTimer) return;
   setTimeout(loadOnce, 1200);
   pollTimer = setInterval(loadOnce, 5000);
 }
+
 events.addEventListener("state", event => {
   sseOk = true;
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
   document.getElementById("live").textContent = "live";
   paint(JSON.parse(event.data));
 });
+
 events.onerror = () => { document.getElementById("live").textContent = "reconnecting"; startPoll(); };
+
+setInterval(() => {
+  const liveEl = document.getElementById("live");
+  if (lastUpdate && Date.now() - lastUpdate > 10000) {
+    liveEl.textContent = "stale";
+    liveEl.className = "bad";
+  }
+}, 2000);
+
+fetchNotes();
 </script>
 </body>
 </html>
