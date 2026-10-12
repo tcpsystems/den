@@ -5,9 +5,9 @@ Den is the production-grade, token-aware agentic runtime and control plane for l
 ## Repository Scope & Ecosystem Boundary
 
 - **`den` (This Repository)**: The local runtime daemon (`denctl`), operator TUI (`dentui`), read/fetch utilities (`denread`, `denfetch`), core process supervisor (`initd`), security guardrails (`path_jail`), and persistent state ledgers.
-- **`tcpsystems/agent-mesh` / Hub (`tcp.systems` org)**: Distributed agent communication mesh, node heartbeat coordination, and A2A sync.
-- **`foxcore-cloud/*`**: Core control plane (`fox`, `foxd`, `floki`), platform services, and infrastructure definitions.
+- **`tcpsystems/agent-mesh`**: Distributed agent communication mesh, node heartbeat coordination, and A2A sync.
 - **`tcpsystems/radar`**: Pricing, live model indexes, provider rate cards, and telemetry state desks.
+*(Note: Foxcore repositories are intentionally excluded from active focus and will be onboarded into the harness at a later stage.)*
 
 ## Core Architecture & Components
 
