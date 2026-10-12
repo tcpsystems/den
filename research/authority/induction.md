@@ -33,9 +33,3 @@ Three watchers. Each emits a score and the evidence. None of them executes a too
 | Progress | The same refusal signature, or the same failure with no new artifact | The second identical attempt |
 
 A watcher becomes a gate only after it beats the current rule on a held-out set: precision, recall, false stops, and latency. Until then the path jail and the deny-once table are the gate.
-
-## What this note does not withdraw
-
-A refusal of a path outside the root, a private host, a shell string, or an ungranted spend stands.
-
-A request to disguise traffic, to mix exits so a vendor's device cap is not counted, or to strip a provider safety layer is outside this contract. The induction does not authorize it. This note does not reopen those refusals.
