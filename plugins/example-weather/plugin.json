@@ -1,0 +1,20 @@
+{
+  "id": "example-weather",
+  "title": "Example weather",
+  "summary": "Shows how a plugin adds one niche and one skill path. It does not call a network.",
+  "entries": [
+    {
+      "kind": "niche",
+      "id": "weather",
+      "title": "Weather",
+      "summary": "City weather questions. Staff a seat only when the task says weather."
+    },
+    {
+      "kind": "skill",
+      "id": "weather-brief",
+      "title": "Weather brief",
+      "summary": "Ask for a city, then one tool call. Do not invent a forecast.",
+      "path": "SKILL.md"
+    }
+  ]
+}

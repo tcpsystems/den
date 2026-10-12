@@ -1,0 +1,37 @@
+[
+  {
+    "id": "searxng",
+    "provider": "local",
+    "note": "Already running. Search stays here. denmcp does not replace it. No image."
+  },
+  {
+    "id": "exa",
+    "provider": "exa",
+    "note": "Optional search provider. Set image when a container exists. Not required."
+  },
+  {
+    "id": "firecrawl",
+    "provider": "firecrawl",
+    "note": "Optional page fetch. denfetch stays as it is until it is expanded."
+  },
+  {
+    "id": "browserbase",
+    "provider": "browserbase",
+    "note": "Optional browser container. One of many. No provider is the default."
+  },
+  {
+    "id": "kernel",
+    "provider": "kernel",
+    "note": "Optional browser provider beside Browserbase."
+  },
+  {
+    "id": "mem0",
+    "provider": "mem0",
+    "note": "Optional memory provider. The disk ledger remains the source the runtime can rebuild."
+  },
+  {
+    "id": "inngest",
+    "provider": "inngest",
+    "note": "Optional workflow provider. Local step files stay valid without it."
+  }
+]
