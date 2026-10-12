@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/exec"
+	"sync"
 	"path/filepath"
 	"strings"
 	"time"
@@ -188,7 +189,21 @@ func readBranches(ctx context.Context, repo string) []Branch {
 	return rows
 }
 
+var probeCache = struct {
+	sync.Mutex
+	at     time.Time
+	values map[string]string
+}{values: map[string]string{}}
+
 func probe(ctx context.Context, rawURL string) string {
+	probeCache.Lock()
+	if time.Since(probeCache.at) < 5*time.Second {
+		if value, ok := probeCache.values[rawURL]; ok {
+			probeCache.Unlock()
+			return value
+		}
+	}
+	probeCache.Unlock()
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, "curl", "-fsS", "-o", "/dev/null", "-w", "%{http_code}", rawURL)
@@ -196,10 +211,15 @@ func probe(ctx context.Context, rawURL string) string {
 	if err != nil {
 		return "down"
 	}
-	if strings.TrimSpace(string(out)) == "200" {
-		return "up"
+	status := "down"
+	if err == nil && strings.TrimSpace(string(out)) == "200" {
+		status = "up"
 	}
-	return "down"
+	probeCache.Lock()
+	probeCache.values[rawURL] = status
+	probeCache.at = time.Now()
+	probeCache.Unlock()
+	return status
 }
 
 func run(ctx context.Context, repo string, args ...string) (string, error) {

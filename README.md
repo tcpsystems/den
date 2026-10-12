@@ -4,21 +4,23 @@ Den is the production-grade, token-aware agentic runtime and control plane for l
 
 ## Measured state
 
-Measured on 2026-10-12 at commit `4e70e6f`:
+Run `scripts/readme-metrics.sh` to refresh this block from the repo and live checks.
 
+<!-- metrics:start -->
 | Metric | Value |
 | --- | ---: |
+| Commit | `5bf93bb` |
 | Skills | 28 |
 | Go files | 56 |
 | Plan documents | 39 |
 | Niche rows | 58 |
-| Commits | 88 |
-| Focused tests | `denctl`, `dencat`, and `catalog` passed |
-| Embedder | Qwen3-Embedding-8B-Q6_K, 4096 dimensions, healthy |
-| Long memory | OpenViking v0.5.0, healthy |
-| Local memory files | 2 files, 8 KB |
+| Commits | 89 |
+| Embedder | healthy |
+| Long memory | healthy |
+| Local memory files | 2 |
+<!-- metrics:end -->
 
-Accuracy, quality, and expansion are not given percentages here. They need a repeated benchmark before a score is published.
+The embedder is Qwen3-Embedding-8B-Q6_K at 4096 dimensions. Accuracy and quality percentages stay unpublished until a repeated benchmark records them.
 
 ## Repository Scope & Ecosystem Boundary
 
